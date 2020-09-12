@@ -1,0 +1,29 @@
+{
+  "name": "nextjs",
+  "version": "4.0.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "latest",
+    "@material-ui/icons": "^4.9.1",
+    "amadeus": "^5.2.0",
+    "axios": "^0.20.0",
+    "body-parser": "^1.19.0",
+    "clsx": "latest",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "next": "latest",
+    "nodemon": "^2.0.4",
+    "prop-types": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "recoil": "0.0.10",
+    "swr": "^0.3.2"
+  },
+  "scripts": {
+    "dev": "next",
+    "airxplora": "nodemon server.js",
+    "build": "next build",
+    "start": "node server.js",
+    "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
+  }
+}
