@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Next.js example
 
 ## How to use
@@ -23,3 +24,7 @@ or:
 ## The idea behind the example
 
 [Next.js](https://github.com/zeit/next.js) is a framework for server-rendered React apps.
+=======
+# airXplora
+A themeable and component based Travel Solution built on top of Nodejs, React, NextJs, Material UI, Recoil and Firebase
+>>>>>>> 346668311beb6b20f438a8a5e97c235f355acfcb
