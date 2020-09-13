@@ -165,7 +165,7 @@ export default function AdminPage() {
         {active === "Commission" && <CommissionPage />}
         {active === "Bookings" && <BookingsPage />}
         {active === "Blog Post" && <BlogPage />}
-        {active === "Blog Post" && <ComponentsPage />}
+        {active === "Components" && <ComponentsPage />}
       </main>
     </div>
   );
