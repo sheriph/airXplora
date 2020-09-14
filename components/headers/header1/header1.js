@@ -8,8 +8,17 @@ import {
   Hidden,
   Button,
   Box,
+  Dialog,
 } from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
+import Slide from "@material-ui/core/Slide";
+import CloseIcon from "@material-ui/icons/Close";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+
+
+
 
 const styles = makeStyles((theme) => ({
   secttion1: {
@@ -32,8 +41,13 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
 const Header1 = () => {
   const classes = styles();
+  const [open, setOpen] = React.useState(false);
   return (
     <>
       <Paper className={classes.paper}>
@@ -48,7 +62,7 @@ const Header1 = () => {
             >
               <Grid item xs="auto">
                 <Typography variant="subtitle2" style={{ cursor: "pointer" }}>
-                  Sign Up
+                  <AccountCircleIcon fontSize = "small" />
                 </Typography>
               </Grid>
               <Grid item xs container spacing={1} justify="flex-end">
@@ -81,30 +95,66 @@ const Header1 = () => {
               <Grid item xs="auto" className={classes.logo}>
                 LOGO
               </Grid>
-              <Grid
-                item
-                container
-                xs
-                spacing={1}
-                // justify="flex-end"
-                alignItems="center"
-              >
-                <Grid item xs="auto">
-                  <Button variant="outlined">Home</Button>
+              <Hidden xsDown>
+                <Grid
+                  item
+                  container
+                  xs
+                  spacing={1}
+                  // justify="flex-end"
+                  alignItems="center"
+                >
+                  <Grid item xs="auto">
+                    <Button variant="outlined">Home</Button>
+                  </Grid>
+                  <Grid item xs="auto">
+                    <Button variant="text">Flight</Button>
+                  </Grid>
+                  <Grid item xs="auto">
+                    <Button variant="text">Hotel</Button>
+                  </Grid>
+                  <Grid item xs="auto">
+                    <Button variant="text">Blog</Button>
+                  </Grid>
                 </Grid>
-                <Grid item xs="auto">
-                  <Button variant="text">Flight</Button>
+              </Hidden>
+              <Hidden smUp>
+                <Grid
+                  item
+                  container
+                  xs
+                  spacing={1}
+                  justify="flex-end"
+                  alignItems="center"
+                >
+                  <Box mr={1}>
+                    <IconButton onClick={() => setOpen((prev) => !prev)}>
+                      <MenuIcon />
+                    </IconButton>
+                  </Box>
                 </Grid>
-                <Grid item xs="auto">
-                  <Button variant="text">Hotel</Button>
-                </Grid>
-                <Grid item xs="auto">
-                  <Button variant="text">Blog</Button>
-                </Grid>
-              </Grid>
+              </Hidden>
             </Grid>
           </Grid>
         </Box>
+      </Paper>
+      <Paper>
+        <Dialog
+          fullScreen
+          open={open}
+          // onClose={handleClose}
+          TransitionComponent={Transition}
+        >
+          <Grid container direction="column">
+            <Button variant="text">
+              <CloseIcon onClick={() => setOpen((prev) => !prev)} />
+            </Button>
+            <Button variant="outlined">Home</Button>
+            <Button variant="text">Flight</Button>
+            <Button variant="text">Hotel</Button>
+            <Button variant="text">Blog</Button>
+          </Grid>
+        </Dialog>
       </Paper>
     </>
   );

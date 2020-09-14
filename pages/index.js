@@ -5,12 +5,22 @@ import Box from "@material-ui/core/Box";
 import ProTip from "../src/ProTip";
 import Link from "../src/Link";
 import Copyright from "../src/Copyright";
-import Header1 from "../components/headers/header1/header1";
+import { makeStyles } from "@material-ui/core";
+import BaseHeader from "../components/headers/baseheader";
+
+const styles = makeStyles((theme) => ({
+  baseBox: {
+    margin: "0",
+    padding: "0",
+  },
+}));
 
 export default function Index() {
+  const classes = styles();
   return (
-    <>
-      <Header1 />
+    <Box className={classes.baseBox}>
+      <BaseHeader title="airXplora : Your Travel Tech Companion" />
+
       <Container maxWidth="sm">
         <Box my={4}>
           <Typography variant="h4" component="h1" gutterBottom>
@@ -23,6 +33,6 @@ export default function Index() {
           <Copyright />
         </Box>
       </Container>
-    </>
+    </Box>
   );
 }
