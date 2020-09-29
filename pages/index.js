@@ -7,6 +7,7 @@ import Link from "../src/Link";
 import Copyright from "../src/Copyright";
 import { makeStyles } from "@material-ui/core";
 import BaseHeader from "../components/headers/baseheader";
+import BookingContainer from "../components/general/bookingcontainer";
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -21,18 +22,7 @@ export default function Index() {
     <Box className={classes.baseBox}>
       <BaseHeader title="airXplora : Your Travel Tech Companion" />
 
-      <Container maxWidth="sm">
-        <Box my={4}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            airXplora.js example
-          </Typography>
-          <Link href="/about" color="secondary">
-            Go to the about page
-          </Link>
-          <ProTip />
-          <Copyright />
-        </Box>
-      </Container>
+      <BookingContainer />
     </Box>
   );
 }

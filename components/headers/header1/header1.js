@@ -1,4 +1,4 @@
-import Reacr from "react";
+import Reacr, { useState, useEffect } from "react";
 import {
   Paper,
   Grid,
@@ -15,10 +15,10 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Slide from "@material-ui/core/Slide";
 import CloseIcon from "@material-ui/icons/Close";
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-
-
-
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import firebase from "../../../firebase/index";
+import { useDocument } from "@nandorojo/swr-firestore";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 const styles = makeStyles((theme) => ({
   secttion1: {
@@ -48,6 +48,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const Header1 = () => {
   const classes = styles();
   const [open, setOpen] = React.useState(false);
+
+  const { data, error, loading } = useDocument("adminSettings/agencyProfile");
   return (
     <>
       <Paper className={classes.paper}>
@@ -62,7 +64,7 @@ const Header1 = () => {
             >
               <Grid item xs="auto">
                 <Typography variant="subtitle2" style={{ cursor: "pointer" }}>
-                  <AccountCircleIcon fontSize = "small" />
+                  <AccountCircleIcon fontSize="small" />
                 </Typography>
               </Grid>
               <Grid item xs container spacing={1} justify="flex-end">
@@ -70,7 +72,13 @@ const Header1 = () => {
                   <CallIcon fontSize="small" />
                 </Grid>
                 <Grid item xs="auto">
-                  <Typography variant="subtitle2">09065369929</Typography>
+                  <Typography variant="subtitle2">
+                    {loading ? (
+                      <Skeleton variant="text" width={100} />
+                    ) : (
+                      data.primaryContact
+                    )}
+                  </Typography>
                 </Grid>
                 <Hidden xsDown>
                   <Grid item xs="auto">
