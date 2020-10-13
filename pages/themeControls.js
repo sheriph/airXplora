@@ -1,6 +1,6 @@
 import React from 'react';
 import ColorController from '../components/colorUi/colorController';
-import SecColorController from '../components/colorUi/SecColorController';
+import SecColorController from '../components/colorUi/bColorController';
 
 function themeControl() {
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import ColorController from '../colorUi/colorController';
-import SecColorController from '../colorUi/secColorController';
+import SecColorController from '../colorUi/bColorController';
 
 const ThemePage = () => {
   return (
