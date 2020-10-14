@@ -22,6 +22,11 @@ import CommissionPage from "./commission";
 import BookingsPage from "./bookings";
 import BlogPage from "./blog";
 import ComponentsPage from "./component";
+import AgencyProfile from "./profile";
+import PersonIcon from '@material-ui/icons/Person';
+import ColorizeIcon from '@material-ui/icons/Colorize';
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
 const drawerWidth = 240;
 
@@ -99,7 +104,7 @@ export default function AdminPage() {
     setOpen(false);
   };
 
-  const [active, setActive] = useState("");
+  const [active, setActive] = useState("Agency Profile");
 
   return (
     <div className={classes.root}>
@@ -122,7 +127,7 @@ export default function AdminPage() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" align="center" noWrap>
-            Admin Backend
+            Admin Backend - {active}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -146,11 +151,14 @@ export default function AdminPage() {
         </div>
         <Divider />
         <List>
-          {["Theme", "Commission", "Bookings", "Blog Post", "Components"].map(
+          {["Agency Profile","Theme", "Commission", "Bookings", "Blog Post", "Components"].map(
             (text, index) => (
               <ListItem button key={text} onClick={(e) => setActive(text)}>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {index === 0 && <PersonIcon />}
+                  {index === 1 && <ColorizeIcon />}
+                  {index === 2 && <LocalOfferIcon />}
+                  {index === 3 && <ViewListIcon />}
                 </ListItemIcon>
                 <ListItemText primary={text} />
               </ListItem>
@@ -161,11 +169,12 @@ export default function AdminPage() {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
+        {active === "Agency Profile" && <AgencyProfile />}
         {active === "Theme" && <ThemePage />}
         {active === "Commission" && <CommissionPage />}
         {active === "Bookings" && <BookingsPage />}
         {active === "Blog Post" && <BlogPage />}
-        {active === "Blog Post" && <ComponentsPage />}
+        {active === "Components" && <ComponentsPage />}
       </main>
     </div>
   );
