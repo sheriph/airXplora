@@ -1,5 +1,6 @@
-
 // new array methods definitions//
+
+import next from "next";
 
 // Warn if overriding existing method
 /* if (Array.prototype.equals)
@@ -39,8 +40,8 @@ export const getTime = (rawTimeString) => {
   let hrs = timeArray[0];
   let min = timeArray[1];
   let newhrs = hrs > 12 ? hrs - 12 : hrs;
-  let suffix = hrs > 12 ? "PM" : "AM";
-  return ` ${newhrs}:${min} ${suffix} `;
+  let suffix = hrs > 12 ? "pm" : "am";
+  return ` ${newhrs}:${min}${suffix}`;
 };
 
 export const getNumberOfNights = (
@@ -182,35 +183,41 @@ export const getDate = (dateString) => {
   ];
   dateString = dateString.split("T")[0];
   let date = new Date(dateString);
-  return ` ${weekDay[date.getDay()]}, ${date.getDate()} ${
+  return ` ${weekDay[date.getDay()]} ${date.getDate()} ${
     month[date.getMonth()]
   }. `;
 };
 
 export const getBaggageAllowance = (flightOffer, segmentId) => {
-  let baggageObj = [{}];
+  if (flightOffer.pricingOptions.includedCheckedBagsOnly === false)
+    return ["No bag"];
+  let baggageObj = [];
 
-  for (let props of flightOffer.travelerPricings) {
-    if (props.travelerType === "ADULT") {
-      for (let item of props.fareDetailsBySegment) {
-        if (item.includedCheckedBags && item.segmentId === segmentId) {
-          let adultObj = {
-            type: "Adult",
-          };
-          let quantity = item.includedCheckedBags.quantity || "";
-          let weight = item.includedCheckedBags.weight || "";
-          let weightUnit = item.includedCheckedBags.weightUnit || "";
-          let id = item.segmentId;
-          adultObj.quantity = quantity;
-          adultObj.weight = weight;
-          adultObj.weightUnit = weightUnit;
-          adultObj.id = id;
-          baggageObj[0] = adultObj;
-        }
+  start: for (let props of flightOffer.travelerPricings) {
+    for (let item of baggageObj) {
+      if (item.type === props.travelerType) continue start;
+    }
+    for (let item of props.fareDetailsBySegment) {
+      if (item.segmentId === segmentId) {
+        let obj = {
+          type: "Adult",
+        };
+        let quantity = item.includedCheckedBags.quantity || "1";
+        let weight = item.includedCheckedBags.weight || "23";
+        let weightUnit = item.includedCheckedBags.weightUnit || "Kg";
+        let id = item.segmentId;
+        obj.quantity = quantity;
+        obj.weight = weight;
+        obj.weightUnit = weightUnit;
+        obj.id = id;
+        baggageObj.push(obj);
       }
     }
   }
-  return baggageObj;
+  return baggageObj.map(
+    (baggage) =>
+      `${baggage.quantity} Bag(s) ${baggage.weight}${baggage.weightUnit}/${baggage.type}`
+  );
 };
 
 export const getPriceBreakDown = (flightOffer) => {
@@ -302,27 +309,21 @@ export const airlineFilterFunction = (flightOffers, airlineFilterArray) => {
 };
 
 export const getAirlineListData = (flightOffers) => {
-  if (!flightOffers) {
-    return;
-  }
-
-  let map = new Map();
+  let set = new Set();
+  let airlineList = [];
 
   for (let flightOffer of flightOffers) {
     for (let iataCode of flightOffer.validatingAirlineCodes) {
-      map.set(iataCode, iataCode);
+      /*  let obj = { airlineName: iataCode, isSelected: false };
+      airlineList.push(obj); */
+      set.add(iataCode);
     }
   }
-  let airlineList = [];
-  for (let [a, b] of map.entries()) {
-    let obj = {};
-    obj.iataCode = a;
-    obj.name = b;
-    obj.isLoading = true;
-    obj.checkStatus = false;
+  for (let iataCode of set) {
+    let obj = { airlineName: iataCode, isSelected: false };
     airlineList.push(obj);
   }
-
+  console.log("airlineList", airlineList);
   return airlineList;
 };
 
@@ -335,61 +336,21 @@ export const getFlightStopsList = (flightOffers) => {
   return Array.from(set);
 };
 
-export const priceFilterFunction = (flightOffers, maxAndMinimumPriceArray) => {
-  if (maxAndMinimumPriceArray.length === 0) {
-    return data;
-  }
-  let newOffers = [];
-
-  for (let flightOffer of flightOffers) {
-    if (Array.isArray(flightOffer)) {
-      let subArr = [];
-      for (let item of flightOffer) {
-        if (
-          item.price.total >= maxAndMinimumPriceArray[0] &&
-          item.price.total <= maxAndMinimumPriceArray[1]
-        ) {
-          subArr.push(item);
-        }
-      }
-      if (subArr.length > 0) {
-        newOffers.push(subArr);
-      }
-    } else {
-      if (
-        flightOffer.price.total >= maxAndMinimumPriceArray[0] &&
-        flightOffer.price.total <= maxAndMinimumPriceArray[1]
-      ) {
-        newOffers.push(flightOffer);
-      }
-    }
-  }
-  return newOffers;
+export const sortByPrice = (flightOffers, priceFilter) => {
+  return flightOffers.filter(
+    (flightOffer) =>
+      flightOffer.price.total >= priceFilter[0] &&
+      flightOffer.price.total <= priceFilter[1]
+  );
 };
 
 export const getMaxAndMinPriceArray = (flightOffers) => {
-  if (!flightOffers) {
-    return [0, 200000000];
-  }
-
-  let max = Math.max(
-    ...flightOffers.map((flightOffer) => {
-      if (Array.isArray(flightOffer)) {
-        return Math.max(...flightOffer.map((item) => Number(item.price.total)));
-      } else {
-        return Number(flightOffer.price.total);
-      }
-    })
+  const max = Math.max(
+    ...flightOffers.map((flightOffer) => Number(flightOffer.price.total))
   );
 
-  let min = Math.min(
-    ...flightOffers.map((flightOffer) => {
-      if (Array.isArray(flightOffer)) {
-        return Math.min(...flightOffer.map((item) => Number(item.price.total)));
-      } else {
-        return Number(flightOffer.price.total);
-      }
-    })
+  const min = Math.min(
+    ...flightOffers.map((flightOffer) => Number(flightOffer.price.total))
   );
 
   return [min, max];
@@ -574,6 +535,25 @@ export const depDatesAndLowestFaresArr = (
   return depDatesAndLowestFaresArr;
 };
 
+export const getStops = (flightOffers) => {
+  let stops = [];
+  let set = new Set();
+  set.add("Any");
+  for (let flightOffer of flightOffers) {
+    for (let itinerary of flightOffer.itineraries) {
+      if (itinerary.segments.length === 1) set.add("Nonstop (Direct)");
+      if (itinerary.segments.length === 2) set.add("1 Stop");
+      if (itinerary.segments.length === 3) set.add("2 Stops");
+      if (itinerary.segments.length === 4) set.add("3 Stop");
+    }
+  }
+  stops = [...Array.from(set)].map((stop) => {
+    if (stop === "Any") return { type: stop, isSelected: true };
+    return { type: stop, isSelected: false };
+  });
+  return stops;
+};
+
 export const addStops = (flightOffers) => {
   let w = "Non Stop Only";
   let x = "1 Stops or Less";
@@ -638,4 +618,19 @@ export const prettyWord = (word) => {
     newWord.push(lowercase);
   }
   return newWord.join(" ");
+};
+
+export const getLayoverPoints = (segments) => {
+  if (segments) {
+    let layover = [];
+    for (let i = 0; i < segments.length; i++) {
+      if (i > 0) {
+        let layoverpoint = {};
+        layoverpoint.id = i;
+        layoverpoint.iataCode = segments[i].departure.iataCode;
+        layover.push(layoverpoint);
+      }
+    }
+    return layover;
+  }
 };

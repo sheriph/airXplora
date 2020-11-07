@@ -9,6 +9,7 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/pickers": "^3.2.10",
     "@nandorojo/swr-firestore": "^0.13.2",
+    "@zeit/next-workers": "^1.0.0",
     "amadeus": "^5.2.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
@@ -22,12 +23,15 @@
     "next": "latest",
     "next-images": "^1.5.0",
     "nodemon": "^2.0.4",
+    "notistack": "^1.0.1",
     "prop-types": "latest",
     "react": "latest",
-    "react-color": "^2.18.1",
+    "react-color": "^2.19.3",
     "react-dom": "latest",
+    "react-lazyload": "^3.1.0",
     "recoil": "0.0.10",
-    "swr": "^0.3.2"
+    "swr": "^0.3.2",
+    "worker-loader": "^3.0.5"
   },
   "scripts": {
     "dev": "next",
@@ -35,5 +39,6 @@
     "build": "next build",
     "start": "node server.js",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
-  }
+  },
+  "devDependencies": {}
 }

@@ -4,13 +4,13 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import CheckIcon from "@material-ui/icons/Check";
 
-const AnimatedSave = ({ updateDate }) => {
+const AnimatedSave = ({ updateData }) => {
   const [icon, setIcon] = useState(<SaveIcon />);
   let id1;
   let id2;
 
   const handleSave = () => {
-    updateDate();
+    updateData();
 
     setIcon(<CircularProgress size="20px" color="inherit" />);
     id1 = setTimeout(() => {

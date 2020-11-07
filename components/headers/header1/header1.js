@@ -23,21 +23,21 @@ import Skeleton from "@material-ui/lab/Skeleton";
 const styles = makeStyles((theme) => ({
   secttion1: {
     height: "20px",
-    backgroundColor: theme.palette.grey[100],
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
+    backgroundColor: theme.palette.common.white,
+    //  paddingLeft: theme.spacing(1),
+    // paddingRight: theme.spacing(1),
   },
   secttion2: {
     height: "50px",
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
+    // paddingLeft: theme.spacing(1),
+    // paddingRight: theme.spacing(1),
   },
   paper: {
-    margin: "0",
-    padding: "0",
+    /*     margin: "0",
+    padding: "0", */
   },
   logo: {
-    marginRight: theme.spacing(2),
+    //   marginRight: theme.spacing(2),
   },
 }));
 
@@ -53,7 +53,7 @@ const Header1 = () => {
   return (
     <>
       <Paper className={classes.paper}>
-        <Box>
+        <Container>
           <Grid container>
             <Grid
               item
@@ -73,7 +73,7 @@ const Header1 = () => {
                 </Grid>
                 <Grid item xs="auto">
                   <Typography variant="subtitle2">
-                    {loading ? (
+                    {!data ? (
                       <Skeleton variant="text" width={100} />
                     ) : (
                       data.primaryContact
@@ -144,7 +144,7 @@ const Header1 = () => {
               </Hidden>
             </Grid>
           </Grid>
-        </Box>
+        </Container>
       </Paper>
       <Paper>
         <Dialog

@@ -15,6 +15,7 @@ import { useSetRecoilState, useRecoilValue } from "recoil";
 import {
   setOpenDepartCalendarState,
   isCalendarOpen_,
+  trip_,
 } from "../../recoil/state";
 
 const styles = makeStyles((theme) => ({
@@ -27,34 +28,36 @@ const styles = makeStyles((theme) => ({
     },
   },
   icon: {
-    marginLeft: "20px"
-  }
+    marginLeft: "20px",
+  },
 }));
 
 const DatePicker = () => {
   const classes = styles();
-  const isCalendarOpen = useRecoilValue(isCalendarOpen_);
+  const tripType = useRecoilValue(trip_);
 
   return (
     <Container disableGutters>
-      <Paper
-        variant={isCalendarOpen ? "elevation" : "outlined"}
-        elevation={3}
-        className={classes.paper}
-      >
+      <Paper variant="outlined" className={classes.paper}>
         <Grid container alignItems="center" justify="center">
-          <Grid item xs={2}>
-            <DateRangeIcon className={classes.icon} />
+          <Grid item xs="auto">
+            <DateRangeIcon color = "primary" className={classes.icon} />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs>
             <DepartureDatePicker />
           </Grid>
-          <Grid item xs={2}>
-            <Typography align="center">-</Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <ReturnDatePicker />
-          </Grid>
+          {tripType === "One way" || tripType === "Multi-city" ? (
+            ""
+          ) : (
+            <React.Fragment>
+              <Grid item xs>
+                <Typography align="center">-</Typography>
+              </Grid>
+              <Grid item xs>
+                <ReturnDatePicker />
+              </Grid>
+            </React.Fragment>
+          )}
         </Grid>
       </Paper>
     </Container>

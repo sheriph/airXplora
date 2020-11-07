@@ -3,13 +3,8 @@ import React, { useState, useEffect } from "react";
 import DateFnsUtils from "@date-io/date-fns";
 import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import { makeStyles, Container, Grid } from "@material-ui/core";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  returnDate_,
-  setReturnDate_,
-  departureDate_,
-  setIsCalendarOpen_,
-} from "../../recoil/state";
+import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
+import { returnDate_, departureDate_ } from "../../recoil/state";
 
 const style = makeStyles((theme) => ({
   datepicker: {
@@ -24,12 +19,14 @@ function ReturnDatePicker() {
   const classes = style();
   //const [returnDate, setReturnDate] = useState(null);
 
-  const returnDate = useRecoilValue(returnDate_);
-  const setReturnDate = useSetRecoilState(setReturnDate_);
   const departureDate = useRecoilValue(departureDate_);
-  const setCalendarOpen = useSetRecoilState(setIsCalendarOpen_);
+
+  const [returnDate, setReturnDate] = useRecoilState(returnDate_);
+
+  
 
   /*   const prettyDate = (date) => date.toISOString().split("T")[0];
+
 
 
   useEffect(()=>{
@@ -52,8 +49,6 @@ function ReturnDatePicker() {
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <DatePicker
               disableToolbar
-              onOpen={() => setCalendarOpen(true)}
-              onClose={() => setCalendarOpen(false)}
               className={classes.datepicker}
               allowKeyboardControl={false}
               autoOk={true}
@@ -69,7 +64,9 @@ function ReturnDatePicker() {
               minDate={departureDate}
               //   minDate={departureDate ? departureDate : ""}
               minDateMessage={false}
-              inputProps={{ style: { padding: "0", textAlign: "left", cursor: "pointer" } }}
+              inputProps={{
+                style: { padding: "0", textAlign: "left", cursor: "pointer" },
+              }}
             />
           </MuiPickersUtilsProvider>
         </Grid>

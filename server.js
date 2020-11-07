@@ -70,7 +70,7 @@ app
 
     //Get Airport Detail from iatacode
 
-    server.post("/api/getairportname", function (req, res) {
+/*     server.post("/api/getairportname", function (req, res) {
       amadeus.referenceData
         .location(req.body.code)
         .get()
@@ -78,15 +78,16 @@ app
         .catch(function (responseError) {
           res.send(responseError);
         });
-    });
+    }); */
 
     server.post("/api/getcityorairport", function (req, res) {
+     // console.log("req.body", req.body)
       amadeus.referenceData
         .location(req.body.code)
         .get()
         .then((response) => res.send(response))
-        .catch(function (responseError) {
-          res.send(responseError);
+        .catch(function (error) {
+          res.send({ errorInfo: error, type: "error" });
         });
     });
 
@@ -94,8 +95,8 @@ app
       amadeus.referenceData.airlines
         .get(req.body)
         .then((response) => res.send(response))
-        .catch(function (responseError) {
-          res.send(responseError);
+        .catch(function (error) {
+          res.send({ errorInfo: error, type: "error" });
         });
     });
 
