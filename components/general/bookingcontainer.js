@@ -9,19 +9,21 @@ import {
   Paper,
   Container,
 } from "@material-ui/core";
+import FlightFinder from "../flightsearchform/flightfinder";
 
 const styles = makeStyles((theme) => ({
   box: {},
   media: {
-    height: "400px",
+   // height: "400px",
     paddingTop: "15px",
+    paddingBottom: "10px"
   },
   grid: {
-    position: "absolute",
+  //  position: "relative",
   },
   paper: {
-    height: "400px",
     margin: "20px",
+  //  minHeight: "400px",
   },
 }));
 
@@ -40,9 +42,9 @@ const BookingContainer = () => {
             <Grid item>
               <Paper elevation={24} className={classes.paper}>
                 <Container>
-                 
-                  This is the Booking Engine Container
-                  .....................................................
+                  <Box py = {5}>
+                    <FlightFinder />
+                  </Box>
                 </Container>
               </Paper>
             </Grid>

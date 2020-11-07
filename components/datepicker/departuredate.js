@@ -2,14 +2,19 @@ import "date-fns";
 import React, { useState, useEffect } from "react";
 import DateFnsUtils from "@date-io/date-fns";
 import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
-import { makeStyles, TextField, Container, Grid } from "@material-ui/core";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import {
+  makeStyles,
+  TextField,
+  Container,
+  Grid,
+  useMediaQuery,
+} from "@material-ui/core";
+import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 import {
   departureDate_,
-  setDepartureDate_,
   returnDate_,
-  setReturnDate_,
-  setIsCalendarOpen_,
+  departureDate1_,
+  trip_,
 } from "../../recoil/state";
 
 const style = makeStyles((theme) => ({
@@ -25,13 +30,11 @@ const style = makeStyles((theme) => ({
 function DepartureDatePicker() {
   const classes = style();
   //const [departureDate, setDepartureDate] = useState(new Date());
-
-  const departureDate = useRecoilValue(departureDate_);
-  const setDepartureDate = useSetRecoilState(setDepartureDate_);
-  const returnDate = useRecoilValue(returnDate_);
-  const setReturnDate = useSetRecoilState(setReturnDate_);
-  const setCalendarOpen = useSetRecoilState(setIsCalendarOpen_);
-
+  const [departureDate, setDepartureDate] = useRecoilState(departureDate_);
+  const [departureDate1, setDepartureDate1] = useRecoilState(departureDate1_);
+  const tripType = useRecoilValue(trip_);
+  const [returnDate, setReturnDate] = useRecoilState(returnDate_);
+  const isMobile = useMediaQuery("(max-width: 600px)");
   /*   const prettyDate = (date) => date.toISOString().split("T")[0];
 
   useEffect(() => {
@@ -47,17 +50,15 @@ function DepartureDatePicker() {
   };
   return (
     <Container disableGutters>
-      <Grid container justify="center" alignItems = "center">
+      <Grid container justify="center" alignItems="center">
         <Grid item>
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <DatePicker
               disableToolbar
-              onOpen={() => setCalendarOpen(true)}
-              onClose={() => setCalendarOpen(false)}
               className={classes.datepicker}
               allowKeyboardControl={false}
               autoOk={true}
-              variant="inline"
+              variant={isMobile ? "dialog" : "inline"}
               inputVariant="outlined"
               // label="Departure"
               value={departureDate}
@@ -68,11 +69,17 @@ function DepartureDatePicker() {
                     setReturnDate(null);
                   }
                 }
+                if (tripType === "Multi-city") {
+                  setDepartureDate1(e);
+                  setReturnDate(e);
+                }
               }}
               format="E dd MMM"
               disablePast={true}
               maxDate={getMaxDate()}
-              inputProps={{ style: { padding: "0", textAlign: "left", cursor: "pointer" } }}
+              inputProps={{
+                style: { padding: "0", textAlign: "left", cursor: "pointer" },
+              }}
             />
           </MuiPickersUtilsProvider>
         </Grid>

@@ -7,6 +7,7 @@ import { RecoilRoot } from "recoil";
 import "firebase/firestore";
 import "firebase/auth";
 import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
+import { SnackbarProvider } from "notistack";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -35,13 +36,14 @@ export default function MyApp(props) {
   return (
     <React.Fragment>
       <ThemeProvider theme={theme}>
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <CssBaseline />
-        <FuegoProvider fuego={fuego}>
-          <RecoilRoot>
-            <Component {...pageProps} />
-          </RecoilRoot>
-        </FuegoProvider>
+        <SnackbarProvider maxSnack = {3}>
+          <CssBaseline />
+          <FuegoProvider fuego={fuego}>
+            <RecoilRoot>
+              <Component {...pageProps} />
+            </RecoilRoot>
+          </FuegoProvider>
+        </SnackbarProvider>
       </ThemeProvider>
     </React.Fragment>
   );

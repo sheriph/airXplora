@@ -23,44 +23,54 @@ import Collapse from "@material-ui/core/Collapse";
 import CloseIcon from "@material-ui/icons/Close";
 import WarningIcon from "@material-ui/icons/Warning";
 import { prettyWord } from "../general/utilities";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { fromSearchState, setFromSearchState } from "../../recoil/state";
+import { useRecoilState } from "recoil";
+import { from_, fromLocal_, fromcity_ } from "../../recoil/state";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 const style = makeStyles((theme) => ({
   paper: {
     position: "absolute",
     marginTop: "5px",
     zIndex: "100000",
+    minWidth: "300px",
   },
   textField: {
     height: "50px",
   },
   radio: {
     marginRight: theme.spacing(1),
-    marginLeft: theme.spacing(3)
+    marginLeft: theme.spacing(3),
+  },
+  inputpaper: {
+    "&:hover": {
+      borderColor: theme.palette.primary.main,
+    },
   },
 }));
 
 const FromSearch = () => {
   const classes = style();
-  const from = useRecoilValue(fromSearchState);
-  const setFrom = useSetRecoilState(setFromSearchState);
-  const [fromArray, setFromArray] = useState([]);
+  const [from, setFrom] = useRecoilState(from_);
+  const [fromcity, setFromCity] = useRecoilState(fromcity_)
+
+  
+  const [fromLocal, setFromLocal] = useRecoilState(fromLocal_);
+  const [fromArray, setFromArray] = useState(null);
   const [open, setOpen] = React.useState(false);
   const [openSuggestionsPaper, setOpenSuggestionsPaper] = useState(false);
   const [isloading, setIsLoading] = useState(false);
+  const source = Axios.CancelToken.source();
 
-  let cancelToken = Axios.CancelToken;
-  let source = cancelToken.source();
-
-  useEffect(() => {
-    if (!from /* || from.length > 6 */) {
+  const handleFromChange = (e) => {
+    setFromLocal(e.target.value);
+    setOpenSuggestionsPaper(true);
+    if (!fromLocal /* || from.length > 6 */) {
       return;
     }
 
     if (isloading === true) {
-      source.cancel("operation cancelled");
+      source.cancel("operation cancelled and starting a new search");
     }
 
     setIsLoading(true);
@@ -69,7 +79,7 @@ const FromSearch = () => {
       url: "/api/airportautosuggest",
       cancelToken: source.token,
       data: {
-        keyword: from,
+        keyword: fromLocal,
         subType: "AIRPORT,CITY",
       },
     })
@@ -83,34 +93,44 @@ const FromSearch = () => {
             iataCodeCityName: `${item.iataCode} ${prettyWord(
               item.address.cityName
             )}`,
-            iataCity: `All Airports in ${prettyWord(item.address.cityName)} (${
-              item.iataCode
-            })`,
+            city: `${prettyWord(item.address.cityName)}`,
+            cityIata: `${prettyWord(item.address.cityName)} (${item.iataCode})`,
             details: `${item.iataCode} ${prettyWord(item.name)}`,
             countryName: `${prettyWord(item.address.countryName)}`,
           };
           suggestionList.push(autosuggestObj);
         }
         setFromArray(suggestionList);
+        if (isloading === true) {
+          source.cancel("operation cancelled and starting a new search");
+        }
         setIsLoading(false);
       })
       .catch((err) => {
         if (Axios.isCancel(err)) console.log("request cancelled:", err.message);
         console.log("autosuggest fetch error", err);
+        if (isloading === true) {
+          source.cancel("operation cancelled and starting a new search");
+        }
         setIsLoading(false);
       });
-  }, [from]);
-
-  const handleFromChange = (e) => {
-    setFrom(e.target.value);
-    setOpenSuggestionsPaper(true);
   };
 
   const handlesuggestionclick = (e, suggestion) => {
+    if (!suggestion) {
+      setFrom("");
+      setFromLocal("");
+      setOpenSuggestionsPaper(false);
+      return;
+    }
     if (suggestion.subType === "CITY") {
-      setFrom(suggestion.iataCity);
+      setFrom(suggestion.iataCode);
+      setFromCity(suggestion.city)
+      setFromLocal(suggestion.city);
     } else {
-      setFrom(suggestion.iataCodeCityName);
+      setFrom(suggestion.iataCode);
+      setFromCity(suggestion.city)
+      setFromLocal(suggestion.cityIata);
     }
 
     setOpenSuggestionsPaper(false);
@@ -118,19 +138,31 @@ const FromSearch = () => {
 
   const handleFromClick = () => {
     setFrom("");
+    setFromLocal("");
   };
 
   const handleFromClickAway = () => {
+    if (!fromArray) {
+      setFrom("");
+      setFromLocal("");
+      setOpenSuggestionsPaper(false);
+      return;
+    }
     if (fromArray[0]) {
       if (fromArray[0].subType === "CITY") {
-        setFrom(fromArray[0].iataCity);
+        setFromLocal(fromArray[0].city);
+        setFrom(fromArray[0].iataCode);
+        setFromCity(fromArray[0].city)
       } else {
-        setFrom(fromArray[0].iataCodeCityName);
+        setFromLocal(fromArray[0].cityIata);
+        setFrom(fromArray[0].iataCode);
+        setFromCity(fromArray[0].city)
       }
       setOpenSuggestionsPaper(false);
     } else {
-      if (from && !fromArray.includes(from)) {
+      if (fromLocal && !fromArray.includes(fromLocal)) {
         setOpen(true);
+        setFromLocal("");
         setFrom("");
       }
 
@@ -140,25 +172,14 @@ const FromSearch = () => {
     }
   };
 
-  const [elevation, setElevation] = useState(1);
-  const [variant, setVariant] = useState("outlined");
-
   return (
     <React.Fragment>
       <Container disableGutters>
-        <Paper elevation={elevation} variant={variant}>
+        <Paper className={classes.inputpaper} variant="outlined">
           <InputBase
             placeholder="Where From ?"
-            onFocus={() => {
-              setVariant("elevation");
-              setElevation(3);
-            }}
-            onBlur={() => {
-              setVariant("outlined");
-              setElevation(1);
-            }}
-            value={from}
-            onChange={handleFromChange}
+            value={fromLocal}
+            onChange={(e) => handleFromChange(e)}
             onClick={handleFromClick}
             className={classes.textField}
             fullWidth
@@ -167,6 +188,7 @@ const FromSearch = () => {
               <RadioButtonUncheckedIcon
                 className={classes.radio}
                 fontSize="small"
+                color="primary"
               />
             }
           />
@@ -175,7 +197,7 @@ const FromSearch = () => {
           <Collapse in={open}>
             <Alert
               className={classes.alert}
-              icon={<WarningIcon />}
+              icon={<WarningIcon color="primary" />}
               color="warning"
               action={
                 <IconButton
@@ -186,7 +208,7 @@ const FromSearch = () => {
                     setOpen(false);
                   }}
                 >
-                  <CloseIcon fontSize="inherit" />
+                  <CloseIcon color="primary" fontSize="inherit" />
                 </IconButton>
               }
             >
@@ -207,9 +229,9 @@ const FromSearch = () => {
                         <ListItem button>
                           <ListItemIcon>
                             {suggestion.subType === "CITY" ? (
-                              <LocationOnIcon />
+                              <LocationOnIcon color="primary" />
                             ) : (
-                              <AirportIcon />
+                              <AirportIcon color="primary" />
                             )}
                           </ListItemIcon>
                           <ListItemText
@@ -219,7 +241,7 @@ const FromSearch = () => {
                           >
                             {suggestion.subType === "CITY" ? (
                               <React.Fragment>
-                                {suggestion.iataCity} <br />
+                                {suggestion.city} <br />
                                 <Typography variant="caption">
                                   {suggestion.countryName}
                                 </Typography>
@@ -236,7 +258,20 @@ const FromSearch = () => {
                         </ListItem>
                       </React.Fragment>
                     ))
-                  : ""}
+                  : [null, null, null, null, null].map((item, index) => (
+                      <React.Fragment key={index}>
+                        <ListItem button>
+                          <ListItemIcon>
+                            <Skeleton variant="circle" width={20} height={20} />
+                          </ListItemIcon>
+                          <ListItemText>
+                            <Typography variant="caption">
+                              <Skeleton />
+                            </Typography>
+                          </ListItemText>
+                        </ListItem>
+                      </React.Fragment>
+                    ))}
               </List>
             </Paper>
           </ClickAwayListener>

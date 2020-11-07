@@ -2,22 +2,18 @@ import React from "react";
 import { Box, Grid, Divider, TextField } from "@material-ui/core";
 
 import AnimatedSave from "../general/animatedsave";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
-  primaryContactState,
-  setPrimaryContactState,
-  secondaryContactState,
-  setSecondaryContactState,
+  primaryContact_,
+  secondaryContact_,
 } from "../../recoil/state";
 import { useDocument } from "@nandorojo/swr-firestore";
 
 const AgencyProfile = () => {
-  const primaryContact = useRecoilValue(primaryContactState);
-  const setPrimaryContact = useSetRecoilState(setPrimaryContactState);
-  const secondaryContact = useRecoilValue(secondaryContactState);
-  const setSecondaryContact = useSetRecoilState(setSecondaryContactState);
 
-  
+  const [primaryContact, setPrimaryContact] = useRecoilState(primaryContact_)
+  const [secondaryContact, setSecondaryContact] = useRecoilState(secondaryContact_)
+
 
   const { data, update, error } = useDocument("adminSettings/agencyProfile", {
     onSuccess: (data) => {
@@ -26,7 +22,7 @@ const AgencyProfile = () => {
     },
   });
 
-  const updateDate = ()=>{
+  const updateData = ()=>{
     update({
       primaryContact: primaryContact,
       secondaryContact: secondaryContact
@@ -72,7 +68,7 @@ const AgencyProfile = () => {
 
         <Grid container direction="row-reverse">
           <Grid item>
-            <AnimatedSave updateDate={updateDate} />
+            <AnimatedSave updateData={updateData} />
           </Grid>
         </Grid>
       </Box>

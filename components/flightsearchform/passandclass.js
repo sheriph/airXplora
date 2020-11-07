@@ -36,7 +36,15 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import AirlineSeatReclineExtraIcon from "@material-ui/icons/AirlineSeatReclineExtra";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
-import AppsIcon from '@material-ui/icons/Apps';
+import AppsIcon from "@material-ui/icons/Apps";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  adult_,
+  child_,
+  infant_,
+  classOfBooking_,
+  trip_,
+} from "../../recoil/state";
 
 const styles = makeStyles((theme) => ({
   grid: {
@@ -46,6 +54,9 @@ const styles = makeStyles((theme) => ({
     //   cursor: "pointer",
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+    "&:hover": {
+      borderColor: theme.palette.primary.main,
+    },
   },
   paper: {
     width: "100%",
@@ -55,7 +66,7 @@ const styles = makeStyles((theme) => ({
   },
   popper: {
     width: "300px",
-    padding: theme.spacing(1),
+    padding: theme.spacing(3),
   },
   boxes: {
     //  padding: theme.spacing(1),
@@ -71,30 +82,38 @@ const styles = makeStyles((theme) => ({
     height: "50px",
   },
   appicon: {
-    marginLeft: "10%"
-  }
+    marginLeft: "10%",
+  },
 }));
 
 //[ ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST ]
 
 const SelectPassengerandClass = () => {
-  const [adultPassenger, setAdultPassenger] = useState(1);
-  const [childPassenger, setChildPassenger] = useState(0);
-  const [infantPassenger, setInfantPassenger] = useState(0);
+  const [adultPassenger, setAdultPassenger] = useRecoilState(adult_);
+  const [childPassenger, setChildPassenger] = useRecoilState(child_);
+  const [infantPassenger, setInfantPassenger] = useRecoilState(infant_);
   const [showInfantErrorMessage, setShowInfantErrorMessage] = useState(false);
   const [classOfBooking, setClassOfBooking] = useState("Economy");
+  const [stateClassOfBooking, setStateClassOfBooking] = useRecoilState(
+    classOfBooking_
+  );
+
   const [openClassOfBooking, setOpenClassOfBooking] = useState(false);
   const [openCollapse, setOpenCollapse] = useState(false);
 
   useEffect(() => {
     switch (classOfBooking) {
       case "Economy":
+        setStateClassOfBooking("ECONOMY");
         return;
-      case "Premium":
+      case "Premium Economy":
+        setStateClassOfBooking("PREMIUM_ECONOMY");
         return;
       case "Business":
+        setStateClassOfBooking("BUSINESS");
         return;
       case "First":
+        setStateClassOfBooking("FIRST");
         return;
       default:
         return;
@@ -123,15 +142,13 @@ const SelectPassengerandClass = () => {
         className={classes.grid}
         {...bindToggle(popupState)}
       >
-      <Grid item xs ={2}>
-        <AppsIcon className = {classes.appicon} />
-      </Grid>
-        <Grid item xs ={10}>
-          <ButtonBase
-            className={classes.buttonBase}
-          >
+        <Grid item xs={2}>
+          <AppsIcon color="primary" className={classes.appicon} />
+        </Grid>
+        <Grid item xs={10}>
+          <ButtonBase className={classes.buttonBase}>
             <Box className={classes.paper}>
-              <Typography align = "left">
+              <Typography align="left">
                 {travelersNumber}{" "}
                 {travelersNumber > 1 ? "Travelers" : "Traveler"},{" "}
                 {classOfBooking}
@@ -145,7 +162,7 @@ const SelectPassengerandClass = () => {
         {({ TransitionProps }) => (
           <ClickAwayListener onClickAway={popupState.close}>
             <Fade {...TransitionProps} timeout={350}>
-              <Paper className={classes.popper}>
+              <Paper elevation={7} className={classes.popper}>
                 <Grid container alignItems="center">
                   <Grid item xs>
                     <Typography>Adult</Typography>

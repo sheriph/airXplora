@@ -1,16 +1,18 @@
 import React, { useState } from "react";
-import { Grid, makeStyles, Hidden, Paper, Box, Container } from "@material-ui/core";
+import {
+  Grid,
+  makeStyles,
+  Hidden,
+  Paper,
+  Box,
+  Container,
+} from "@material-ui/core";
 import FromSearch from "./fromsearch";
 import ToSearch from "./tosearch";
 import SwapHorizontalCircleIcon from "@material-ui/icons/SwapHorizontalCircle";
 import SwapVerticalCircleIcon from "@material-ui/icons/SwapVerticalCircle";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  fromSearchState,
-  setFromSearchState,
-  toSearchState,
-  setToSearchState,
-} from "../../recoil/state";
+import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
+import { from_, to_ } from "../../recoil/state";
 import { shadows } from "@material-ui/system";
 import clsx from "clsx";
 
@@ -20,13 +22,13 @@ const styles = makeStyles((theme) => ({
   },
   icongrid: {
     width: "5px",
-    zIndex: 1500000,
+    //  zIndex: 1500000,
     // padding: "0",
     //   margin: "0",
   },
   verticalicongrid: {
     margin: "0",
-    zIndex: 1500000,
+    //  zIndex: 1500000,
     width: "5px",
     marginTop: "-10px",
     marginBottom: "-5px",
@@ -59,11 +61,8 @@ const styles = makeStyles((theme) => ({
 }));
 
 const FromAndToSearch = () => {
-  const from = useRecoilValue(fromSearchState);
-  const setFrom = useSetRecoilState(setFromSearchState);
-  const to = useRecoilValue(toSearchState);
-  const setTo = useSetRecoilState(setToSearchState);
-  console.log(from, to);
+  const [from, setFrom] = useRecoilState(from_);
+  const [to, setTo] = useRecoilState(to_);
   const swapnow = () => {
     if (from && to) {
       setFrom(to);
@@ -89,11 +88,10 @@ const FromAndToSearch = () => {
             container
             justify="center"
           >
-            <Grid onClick={swapnow} item>
+            <Grid onClick={swapnow} style={{ cursor: "pointer" }} item>
               <Box display="flex" borderRadius="10px">
                 <SwapHorizontalCircleIcon
                   color={from && to ? "primary" : "disabled"}
-                  style={{ cursor: "pointer" }}
                   fontSize="large"
                   className={clsx(
                     !rotate && classes.rotate1,
@@ -121,11 +119,15 @@ const FromAndToSearch = () => {
             container
             justify="center"
           >
-            <Grid onClick={swapnow} xs="auto" item>
+            <Grid
+              onClick={swapnow}
+              style={{ cursor: "pointer" }}
+              xs="auto"
+              item
+            >
               <Box display="flex" borderRadius="10px">
                 <SwapVerticalCircleIcon
                   color={from && to ? "primary" : "disabled"}
-                  style={{ cursor: "pointer" }}
                   fontSize="large"
                   className={clsx(
                     !rotate && classes.rotate3,
