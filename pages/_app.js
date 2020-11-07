@@ -8,6 +8,7 @@ import "firebase/firestore";
 import "firebase/auth";
 import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
 import { SnackbarProvider } from "notistack";
+import Axios from "axios";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -24,6 +25,7 @@ const fuego = new Fuego(firebaseConfig);
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
+  Axios.defaults.baseURL = "http://localhost:3000";
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -36,7 +38,7 @@ export default function MyApp(props) {
   return (
     <React.Fragment>
       <ThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack = {3}>
+        <SnackbarProvider maxSnack={3}>
           <CssBaseline />
           <FuegoProvider fuego={fuego}>
             <RecoilRoot>

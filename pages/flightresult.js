@@ -114,7 +114,7 @@ export default function FlightResult() {
       url: "/api/flightofferpost",
     })
       .then((res) => {
-        //  console.log("response", res.data);
+          console.log("response", res);
 
         setLastSearch(data.lastSearch);
         setPrevState(data.prevState);
@@ -155,7 +155,7 @@ export default function FlightResult() {
                   <LazyLoad
                     key={flightOffer.id}
                     height={150}
-                    offset={100}
+                    offset={500}
                     unmountIfInvisible
                     placeholder={
                       <Container className={classes.placeholdercontainer}>

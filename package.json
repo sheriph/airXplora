@@ -2,6 +2,10 @@
   "name": "nextjs",
   "version": "4.0.0",
   "private": true,
+  "cacheDirectories": [
+    ".next/cache"
+  ],
+  "description": "travel technology solution",
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
     "@material-ui/core": "latest",
@@ -34,10 +38,10 @@
     "worker-loader": "^3.0.5"
   },
   "scripts": {
-    "dev": "next",
+    "dev": "next dev",
     "airxplora": "nodemon server.js",
     "build": "next build",
-    "start": "node server.js",
+    "start": "next start",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
   },
   "devDependencies": {}
