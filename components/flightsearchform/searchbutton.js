@@ -363,7 +363,9 @@ const SearchButton = () => {
     set({ lastSearch: data, prevState: state })
       .then((res) => {
         console.log("is-success");
-        router.push("/flightresult");
+        router.push("/flightresult").then(() => {
+          router.reload();
+        });
       })
       .catch((err) => console.log(err));
     //  setLoading(true);
