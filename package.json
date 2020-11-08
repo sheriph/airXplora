@@ -28,6 +28,7 @@
     "next-images": "^1.5.0",
     "nodemon": "^2.0.4",
     "notistack": "^1.0.1",
+    "npm-install-peers": "^1.2.1",
     "prop-types": "latest",
     "react": "latest",
     "react-color": "^2.19.3",
