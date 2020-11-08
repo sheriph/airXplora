@@ -28,7 +28,7 @@ export default function MyApp(props) {
   const { Component, pageProps } = props;
   Axios.defaults.baseURL =
     process.env.NODE_ENV === "production"
-      ? "https://airxplora.herokuapp.com/"
+      ? "https://airxplora.vercel.app/"
       : "http://localhost:3000";
 
   React.useEffect(() => {
