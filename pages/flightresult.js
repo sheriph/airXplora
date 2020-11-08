@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Container from "@material-ui/core/Container";
+/* import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import ProTip from "../src/ProTip";
@@ -68,7 +68,7 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-export default function FlightResult() {
+const FlightResult = () => {
   const [flightOffers, setFlightOffers] = useRecoilState(flightOffers_);
   const [prevState, setPrevState] = useRecoilState(prevState_);
   const [lastSearch, setLastSearch] = useRecoilState(lastSearch_);
@@ -114,7 +114,7 @@ export default function FlightResult() {
       url: "/api/flightofferpost",
     })
       .then((res) => {
-          console.log("response", res);
+        console.log("response", res);
 
         setLastSearch(data.lastSearch);
         setPrevState(data.prevState);
@@ -196,4 +196,8 @@ export default function FlightResult() {
       </Grid>
     </Container>
   );
-}
+}; */
+
+const FlightResult = () => <>hello world</>;
+
+export default FlightResult;
