@@ -9,6 +9,7 @@ import "firebase/auth";
 import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
 import { SnackbarProvider } from "notistack";
 import Axios from "axios";
+import Head from "next/head";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -40,6 +41,9 @@ export default function MyApp(props) {
 
   return (
     <React.Fragment>
+      <Head>
+        <link rel="favicon" href="/favicon.ico" />
+      </Head>
       <ThemeProvider theme={theme}>
         <SnackbarProvider maxSnack={3}>
           <CssBaseline />
