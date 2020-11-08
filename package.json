@@ -33,13 +33,10 @@
     "notistack": "^1.0.1",
     "npm-install-peers": "^1.2.1",
     "prop-types": "latest",
-    "react": "^17.0.1",
     "react-color": "^2.19.3",
-    "react-dom": "^17.0.1",
     "react-lazyload": "^3.1.0",
     "recoil": "0.0.10",
-    "swr": "^0.3.2",
-    "worker-loader": "^3.0.5"
+    "swr": "^0.3.2"
   },
   "scripts": {
     "dev": "next dev",
@@ -48,5 +45,9 @@
     "heroku-postbuild": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "worker-loader": "^2.0.0"
+  }
 }
