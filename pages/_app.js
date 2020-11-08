@@ -25,7 +25,10 @@ const fuego = new Fuego(firebaseConfig);
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
-  Axios.defaults.baseURL = "http://localhost:3000";
+  Axios.defaults.baseURL =
+    process.env.NODE_ENV === "production"
+      ? "https://airxplora.herokuapp.com/"
+      : "http://localhost:3000";
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
