@@ -1,14 +1,17 @@
 {
-  "name": "nextjs",
+  "name": "airxplora",
   "version": "4.0.0",
   "private": true,
+  "description": "travel technology solution",
   "cacheDirectories": [
     ".next/cache"
   ],
-  "description": "travel technology solution",
+  "engines": {
+    "node": "12.16.2"
+  },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
-    "@material-ui/core": "latest",
+    "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/pickers": "^3.2.10",
@@ -24,25 +27,27 @@
     "firebase": "^7.20.0",
     "material-table": "^1.69.1",
     "material-ui-popup-state": "^1.6.1",
-    "next": "latest",
+    "next": "^10.0.1",
     "next-images": "^1.5.0",
     "nodemon": "^2.0.4",
     "notistack": "^1.0.1",
     "npm-install-peers": "^1.2.1",
     "prop-types": "latest",
-    "react": "latest",
     "react-color": "^2.19.3",
-    "react-dom": "latest",
     "react-lazyload": "^3.1.0",
     "recoil": "0.0.10",
-    "swr": "^0.3.2",
-    "worker-loader": "^3.0.5"
+    "swr": "^0.3.2"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "worker-loader": "^2.0.0"
+  }
 }
