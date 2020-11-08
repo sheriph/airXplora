@@ -9,7 +9,7 @@ const GetComment = () => {
     <>
       <Button
         onClick={() => {
-          console.log(process.env.PUBLIC_URL);
+          console.log(process.env.NODE_ENV);
         }}
       >
         Get Comment
