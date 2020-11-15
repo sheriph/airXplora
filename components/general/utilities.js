@@ -323,7 +323,6 @@ export const getAirlineListData = (flightOffers) => {
     let obj = { airlineName: iataCode, isSelected: false };
     airlineList.push(obj);
   }
-  console.log("airlineList", airlineList);
   return airlineList;
 };
 
@@ -437,26 +436,44 @@ export const formatDate2 = (dateString) => {
 
 export const getPlusMinus3DaysArray = (date) => {
   let dateArr = [];
-  let startDate = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() - 2
-  );
-  for (let i = 0; i < 7; i++) {
-    let date = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth(),
-      startDate.getDate() + i
+
+  for (let i = -2; i < 5; i++) {
+    let currentDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + i
     );
     let obj = {};
-    obj.date = date.toISOString().split("T")[0];
-    let formatDate = formatDate2(date.toISOString());
-    obj.dayOfTheWeek = formatDate.split(",")[0];
-    obj.dateMonth = formatDate.split(",")[1];
+    obj.currentDate = currentDate.toISOString().split("T")[0];
+    let formatDate = formatDate2(currentDate.toISOString());
+    obj.prettyDate = `${formatDate.split(",")[0]}${formatDate.split(",")[1]}`;
     dateArr.push(obj);
   }
 
   return dateArr;
+};
+
+export const getReturnDateAndData = (departureDate, returnDate, tripType) => {
+  const departureDateMatrix = getPlusMinus3DaysArray(departureDate);
+  const returnDateMatrix = getPlusMinus3DaysArray(returnDate);
+  if (tripType === "Round trip") {
+    let returnDateAndData = [];
+    for (let item of returnDateMatrix) {
+      let obj = {};
+      //  obj.prettyDate = item.prettyDate;
+      let data = [];
+      for (let props of departureDateMatrix) {
+        let obj = { departure: props.currentDate, return: item.currentDate };
+        data.push(obj);
+      }
+      obj.data = [item.prettyDate, ...data];
+      returnDateAndData.push(obj);
+    }
+
+    return returnDateAndData;
+  } else if (tripType === "One way") {
+    return [{ data: ["One way", ...departureDateMatrix] }];
+  }
 };
 
 export const depDatesAndLowestFaresArr = (

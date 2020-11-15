@@ -66,10 +66,12 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const BeginTimeline2 = () => {
+const BeginTimeline2 = ({ flightOffer }) => {
   const classes = styles();
 
-  const flightOffer = useRecoilValue(flightOffer_);
+  //  const flightOffer = useRecoilValue(flightOffer_);
+
+  if (!flightOffer) return <>Loading ...</>;
 
   const inBoundItinerary = flightOffer.itineraries[1];
 

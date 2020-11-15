@@ -79,6 +79,8 @@ const OutboundFlight = ({ flightOffer }) => {
   const classes = styles();
   const prevState = useRecoilValue(prevState_);
 
+  if (!flightOffer) return <>Loading ...</>;
+
   const outBoundItinerary = flightOffer.itineraries[0];
   const outBoundSegments = flightOffer.itineraries[0].segments;
   const lastSegment =
@@ -131,7 +133,7 @@ const OutboundFlight = ({ flightOffer }) => {
             {prevState.tripType === "Multi-city" ? (
               <>
                 {itineraries.map((itinerary, index) => {
-               //   const outBoundItinerary = flightOffer.itineraries[index];
+                  //   const outBoundItinerary = flightOffer.itineraries[index];
                   const outBoundSegments = itinerary.segments;
                   const lastSegment =
                     itinerary.segments[itinerary.segments.length - 1];

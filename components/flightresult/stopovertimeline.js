@@ -76,6 +76,9 @@ const StopoverTimeline = ({ outBoundSegments, flightOffer }) => {
   //  const flightOffer = useRecoilValue(flightOffer_);
   // const outBoundSegments = flightOffer.itineraries[0].segments;
   //  console.log("outBoundSegments stop", outBoundSegments, flightOffer);
+
+  if (!flightOffer || !outBoundSegments) return <>Loading ...</>;
+
   const [stopsArray, setStopsArray] = useState([]);
 
   useEffect(() => {
@@ -101,7 +104,6 @@ const StopoverTimeline = ({ outBoundSegments, flightOffer }) => {
   return (
     <>
       {stopsArray.map((segment) => {
-        console.log("active stops", segment);
         return (
           <TimelineItem key={segment.id}>
             <TimelineOppositeContent

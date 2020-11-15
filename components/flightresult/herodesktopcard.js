@@ -36,7 +36,7 @@ const HeroDesktopCard = ({ flightOffer }) => {
   // const isMobile = useMediaQuery("(max-width: 600px)");
   const itineraries = flightOffer.itineraries;
   return (
-    <Container>
+    <Container disableGutters>
       <Card>
         <CardActionArea>
           <CardContent>
