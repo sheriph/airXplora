@@ -96,7 +96,7 @@ const MatrixItem = ({ value, lowestValue, highestValue, flightOffer }) => {
             </Grid>
           </Paper>
         </Popper>
-        <Drawer
+{/*         <Drawer
           className={classes.drawer}
           anchor="right"
           open={isDrawerOpen}
@@ -109,7 +109,7 @@ const MatrixItem = ({ value, lowestValue, highestValue, flightOffer }) => {
           <Container>
             <FlightSumarry flightOffer={flightOffer} />
           </Container>
-        </Drawer>
+        </Drawer> */}
       </>
     );
 
@@ -144,7 +144,7 @@ const MatrixItem = ({ value, lowestValue, highestValue, flightOffer }) => {
         </Paper>
       </Popper>
 
-      <Drawer
+   {/*    <Drawer
         className={classes.drawer}
         anchor="right"
         open={isDrawerOpen}
@@ -157,7 +157,7 @@ const MatrixItem = ({ value, lowestValue, highestValue, flightOffer }) => {
         <Container>
           <FlightSumarry flightOffer={flightOffer} />
         </Container>
-      </Drawer>
+      </Drawer> */}
     </React.Fragment>
   );
 };

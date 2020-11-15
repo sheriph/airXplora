@@ -40,7 +40,7 @@ const styles = makeStyles((theme) => ({
     bottom: "5px",
   },
 }));
-const AboutFlight = () => {
+const AboutFlight = ({prevState}) => {
   const classes = styles();
 
   const [openCollapse, toggleOpenCollapse] = useState(false);
@@ -49,7 +49,7 @@ const AboutFlight = () => {
     toggleOpenCollapse((prev) => !prev);
   };
 
-  const prevState = useRecoilValue(prevState_);
+ // const prevState = useRecoilValue(prevState_);
 
   if (!prevState) return <> loading .. </>;
   return (

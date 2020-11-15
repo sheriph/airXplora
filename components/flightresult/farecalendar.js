@@ -44,12 +44,8 @@ export default function FareCalendar({ prevState, lastSearch }) {
     prevState.tripType
   );
   const [count, setCount] = useState(1);
-  const [fullMatrix, setFullMatrix] = useRecoilState(fullReturn_);
-  console.log(fullMatrix)
-  const [lowestValue, setLowestValue] = useState(0);
-  const [highestValue, setHighestValue] = useState(0);
+  const [fullMatrix, setFullMatrix] = useState([]);
 
-  console.log("returnDateMatrix", returnDateMatrix);
 
   useEffect(() => {
     console.log("fetching matrix....");
@@ -62,39 +58,7 @@ export default function FareCalendar({ prevState, lastSearch }) {
       })
         .then(async (res) => {
           console.log("response", res.data);
-          let updatedFullMatrix = res.data;
-          for (let item of updatedFullMatrix) {
-            let obj = item.data;
-            for (let i = 1; i < obj.length; i++) {
-              const flightOffers = await Axios({
-                data: obj[i].lastSearch,
-                method: "post",
-                url: "/api/flightofferpost",
-              })
-                .then((res) => {
-                  if (res.type === "error") throw new Error(res.error);
-                  console.log("res.data", res.data);
-                  return res.data;
-                })
-                .catch((err) => {
-                  console.log(err);
-                  return null;
-                });
-              obj[i] = { ...obj[i], flightOffers };
-            }
-          }
-          console.log("updatedFullMatrix", updatedFullMatrix);
-          let set = new Set();
-          for (let item of updatedFullMatrix) {
-            let data = item.data;
-            for (let i = 1; i < data.length; i++) {
-              if (data[i].flightOffers[0])
-                set.add(ata[i].flightOffers[0].price.total);
-            }
-          }
-          setHighestValue(Math.max(...set));
-          setLowestValue(Math.min(...set));
-          setFullMatrix(updatedFullMatrix);
+          setFullMatrix(res.data);
         })
         .catch((err) => console.log(err));
       return data;
@@ -106,7 +70,7 @@ export default function FareCalendar({ prevState, lastSearch }) {
   // return <Button onClick={() => setCount((prev) => prev + 1)}>fetch</Button>;
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table className={classes.table} aria-label="simple table">
         <TableHead component={TableBody}>
           <TableRow>
@@ -152,44 +116,15 @@ export default function FareCalendar({ prevState, lastSearch }) {
                       {data}
                     </Typography>
                   ) : (
-                    /* <GetFlightOffer
-                      departureDate={date.departure}
+                    <GetFlightOffer
+                      departureDate={data.departure}
                       returnDate={
                         prevState.tripType === "Round trip"
-                          ? date.return
+                          ? data.return
                           : undefined
                       }
-                      lastSearch={lastSearch}
-                    /> */ <>
-                      {/*  <Typography>
-                        {data.flightOffers[0] ? (
-                          <>
-                            &#8358;
-                            {formatPrice(data.flightOffers[0].price.total)}
-                          </>
-                        ) : (
-                          "...."
-                        )}
-                      </Typography> */}
-                      {data.flightOffers[0] ? (
-                        <>
-                          <MatrixItem
-                            value={data.flightOffers[0].price.total}
-                            lowestValue={
-                              lowestValue ===
-                              Number(data.flightOffers[0].price.total)
-                            }
-                            highestValue={
-                              highestValue ===
-                              Number(data.flightOffers[0].price.total)
-                            }
-                            flightOffer={data.flightOffers[0]}
-                          />
-                        </>
-                      ) : (
-                        "...."
-                      )}
-                    </>
+                      lastSearch={data.lastSearch}
+                    />
                   )}
                 </TableCell>
               ))}

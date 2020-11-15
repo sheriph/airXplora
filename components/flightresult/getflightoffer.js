@@ -4,7 +4,7 @@ import useSWR from "swr";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { formatPrice } from "../general/utilities";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { isDrawerOpen_, matrixPrice_ } from "../../recoil/state";
+import { isDrawerOpen_, lowestValue_, matrixPrice_ } from "../../recoil/state";
 import {
   Container,
   Drawer,
@@ -83,40 +83,10 @@ const fetcher = async (...arg) => {
 
 const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   const classes = styles();
-  const [isDrawerOpen, toggleDrawer] = useRecoilState(isDrawerOpen_);
   const [matrixPrice, setMatrixPrice] = useRecoilState(matrixPrice_);
   const matrixPriceSub = useRecoilValue(matrixPrice_);
-  //  console.log("matrixPriceSub", matrixPriceSub);
-  // console.log("returnDate", returnDate);
-  if (returnDate) {
-    lastSearch = {
-      ...lastSearch,
-      originDestinations: [
-        {
-          ...lastSearch.originDestinations[0],
-          departureDateTimeRange: { date: departureDate },
-        },
-        {
-          ...lastSearch.originDestinations[1],
-          departureDateTimeRange: { date: returnDate },
-        },
-      ],
-      searchCriteria: { ...lastSearch.searchCriteria, maxFlightOffers: 1 },
-    };
-  } else {
-    lastSearch = {
-      ...lastSearch,
-      originDestinations: [
-        {
-          ...lastSearch.originDestinations[0],
-          departureDateTimeRange: { date: departureDate },
-        },
-      ],
-      searchCriteria: { ...lastSearch.searchCriteria, maxFlightOffers: 1 },
-    };
-  }
-
-  // console.log("lastSearch", lastSearch);
+  const [lv, setLowestValue] = useRecoilState(lowestValue_);
+  const lowestValue = useRecoilValue(lowestValue_);
 
   const { data, error, isValidating } = useSWR(
     [
@@ -142,6 +112,7 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
         let set = new Set(matrixPriceSub);
         set.add(data.price.total);
         setMatrixPrice(Array.from(set));
+        setLowestValue(Math.min(...matrixPriceSub));
       },
     }
   );
@@ -161,10 +132,10 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   if (data) {
     // console.log("airline name response:", data);
 
-    const lowestValue = Math.min(...matrixPriceSub);
+    //  const lowestValue = Math.min(...matrixPriceSub);
     const highestValue = Math.max(...matrixPriceSub);
 
-    /*   const MyPopper = () => (
+    const MyPopper = () => (
       <Popper keepMounted={false} {...bindPopper(popupState)}>
         <Paper variant="elevation" elevation={12}>
           <Grid container justify="center">
@@ -184,7 +155,7 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
           </Grid>
         </Paper>
       </Popper>
-    ); */
+    );
 
     if (lowestValue === Number(data.price.total))
       return (
@@ -198,29 +169,7 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
               &#8358;{formatPrice(data.price.total)}
             </Typography>
           </Paper>
-          <Popper keepMounted={false} {...bindPopper(popupState)}>
-            <Paper variant="elevation" elevation={12}>
-              <Grid container justify="center">
-                <Grid item>
-                  <CancelIcon
-                    onClick={() => {
-                      popupState.close();
-                    }}
-                    color="primary"
-                    fontSize="large"
-                    className={classes.cancelicon}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  onClick={() => toggleDrawer((prev) => !prev)}
-                >
-                  <ResultCard flightOffer={data} />
-                </Grid>
-              </Grid>
-            </Paper>
-          </Popper>
+          <MyPopper />
         </>
       );
 
@@ -237,40 +186,7 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
         >
           &#8358;{formatPrice(data.price.total)}
         </Typography>
-        <Popper keepMounted={false} {...bindPopper(popupState)}>
-          <Paper variant="elevation" elevation={12}>
-            <Grid container justify="center">
-              <Grid item>
-                <CancelIcon
-                  onClick={() => {
-                    popupState.close();
-                  }}
-                  color="primary"
-                  fontSize="large"
-                  className={classes.cancelicon}
-                />
-              </Grid>
-              <Grid item xs={12} onClick={() => toggleDrawer((prev) => !prev)}>
-                <ResultCard flightOffer={data} />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Popper>
-
-        <Drawer
-          className={classes.drawer}
-          anchor="right"
-          open={isDrawerOpen}
-          ModalProps={{
-            keepMounted: false,
-            onBackdropClick: () => toggleDrawer((prev) => !prev),
-          }}
-          transitionDuration={250}
-        >
-          <Container>
-            <FlightSumarry flightOffer={data} />
-          </Container>
-        </Drawer>
+        <MyPopper />
       </React.Fragment>
     );
   }

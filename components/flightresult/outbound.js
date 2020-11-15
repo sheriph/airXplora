@@ -75,11 +75,11 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const OutboundFlight = ({ flightOffer }) => {
+const OutboundFlight = ({ flightOffer, prevState }) => {
   const classes = styles();
-  const prevState = useRecoilValue(prevState_);
+  // const prevState = useRecoilValue(prevState_);
 
-  if (!flightOffer) return <>Loading ...</>;
+  if (!flightOffer || !prevState) return <>Loading ...</>;
 
   const outBoundItinerary = flightOffer.itineraries[0];
   const outBoundSegments = flightOffer.itineraries[0].segments;
