@@ -90,13 +90,13 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const FlightSumarry = ({ flightOffer }) => {
+const FlightSumarry = ({ flightOffer, prevState }) => {
   const isMobile = useMediaQuery("(max-width: 600px)");
   const classes = styles();
   const [isDrawerOpen, toggleDrawerState] = useRecoilState(isDrawerOpen_);
-  const prevState = useRecoilValue(prevState_);
+  // const prevState = useRecoilValue(prevState_);
 
-  if (!flightOffer) return <>Loading ...</>;
+  if (!flightOffer || !prevState) return <>Loading ...</>;
   return (
     <React.Fragment>
       <Container disableGutters className={classes.container}>
@@ -125,7 +125,7 @@ const FlightSumarry = ({ flightOffer }) => {
           className={classes.sumarryGrid}
         >
           <Grid item>
-            <OutboundFlight flightOffer={flightOffer} />
+            <OutboundFlight prevState={prevState} flightOffer={flightOffer} />
           </Grid>
 
           {prevState.tripType === "One way" ||
@@ -136,7 +136,7 @@ const FlightSumarry = ({ flightOffer }) => {
               item
               className={isMobile === true ? classes.inboundcard : classes.none}
             >
-              <InboundFlight flightOffer={flightOffer} />
+              <InboundFlight prevState={prevState} flightOffer={flightOffer} />
             </Grid>
           )}
         </Grid>

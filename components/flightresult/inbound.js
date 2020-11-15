@@ -76,12 +76,12 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const InboundFlight = ({ flightOffer }) => {
+const InboundFlight = ({ flightOffer, prevState }) => {
   const classes = styles();
-  const prevState = useRecoilValue(prevState_);
+  // const prevState = useRecoilValue(prevState_);
   // const flightOffer = useRecoilValue(flightOffer_);
 
-  if (!flightOffer) return <>Loading ...</>;
+  if (!flightOffer || !prevState) return <>Loading ...</>;
 
   const inBoundItinerary = flightOffer.itineraries[1];
   // console.log("prevState1", prevState);

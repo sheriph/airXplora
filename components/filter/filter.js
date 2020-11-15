@@ -33,6 +33,7 @@ import {
   getStops,
 } from "../general/utilities";
 import FilterListIcon from "@material-ui/icons/FilterList";
+import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles((theme) => ({
   accordiondetailsroot: {
@@ -46,15 +47,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Filter({ isMobile }) {
+export default function Filter({ defaultFlightOffers, isMobile }) {
+  if (!defaultFlightOffers) return <>Loading..</>;
   const classes = useStyles();
   const [isPriceExpanded, togglePriceExpansion] = useState(true);
   const [isAirlineExpanded, toggleAirlineExpansion] = useState(true);
   const [isStopsExpanded, toggleStopsExpansion] = useState(true);
   const filterRange = useRecoilValue(priceFilterValue_);
 
-  const [flightOffers, setFlightOffers] = useRecoilState(flightOffers_);
-  const [pureFlightOffers, setPureFlightOffers] = useState([...flightOffers]);
+  const [flightOffers, setFlightOffers] = useState(defaultFlightOffers);
+  const [pureFlightOffers, setPureFlightOffers] = useState(flightOffers);
   const range = getMaxAndMinPriceArray(pureFlightOffers);
   const airlinesList = getAirlineListData(pureFlightOffers);
   const stops = getStops(pureFlightOffers);
@@ -149,6 +151,7 @@ export default function Filter({ isMobile }) {
       setFilterRange(range);
     }
   }, []); */
+  if (!defaultFlightOffers) <> Loading </>;
   return (
     <Container>
       {isMobile ? (
@@ -191,9 +194,14 @@ export default function Filter({ isMobile }) {
                   aria-controls="panel1a-content"
                   id="panel1a-header"
                 >
-                  <Grid container>
+                  <Grid container justify="space-between">
                     <Grid item>
                       <Typography>Price (NGN)</Typography>
+                    </Grid>
+                    <Grid item onClick={() => setPriceDrawer((prev) => !prev)}>
+                      <Typography>
+                        <CloseIcon color="primary" />
+                      </Typography>
                     </Grid>
                   </Grid>
                 </AccordionSummary>
@@ -242,6 +250,14 @@ export default function Filter({ isMobile }) {
                     <Grid item>
                       <Typography>Preffered Airlines</Typography>
                     </Grid>
+                    <Grid
+                      item
+                      onClick={() => setAirlinesDrawer((prev) => !prev)}
+                    >
+                      <Typography>
+                        <CloseIcon color="primary" />
+                      </Typography>
+                    </Grid>
                   </Grid>
                 </AccordionSummary>
                 <AccordionDetails
@@ -288,6 +304,11 @@ export default function Filter({ isMobile }) {
                   <Grid container justify="space-between">
                     <Grid item>
                       <Typography>Preffered Stops</Typography>
+                    </Grid>
+                    <Grid item onClick={() => setStopsDrawer((prev) => !prev)}>
+                      <Typography>
+                        <CloseIcon color="primary" />
+                      </Typography>
                     </Grid>
                   </Grid>
                 </AccordionSummary>

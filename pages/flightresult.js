@@ -37,6 +37,8 @@ import Axios from "axios";
 import LazyLoad from "react-lazyload";
 import Skeleton from "@material-ui/lab/Skeleton";
 import FareCalendar from "../components/flightresult/farecalendar";
+import PricingTable from "../components/flightresult/pricingtable";
+import FlightOffersList from "../components/flightresult/flightofferslist";
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -105,26 +107,7 @@ const FlightResult = () => {
       console.log("slow network detected");
     },
   });
-  useEffect(() => {
-    if (!data) return;
-    console.log("fetching....");
-    Axios({
-      data: data.lastSearch,
-      method: "post",
-      url: "/api/flightofferpost",
-    })
-      .then((res) => {
-        if (res.type === "error") throw new Error(res.error);
-        
-        setLastSearch(data.lastSearch);
-        setPrevState(data.prevState);
-        setFlightOffers(res.data);
-        return;
-      })
-      .catch((err) => console.log(err));
-  }, [data]);
 
-  if (!flightOffers) return <> Loading ... </>;
   return (
     <Container disableGutters maxWidth="xl" className={classes.container}>
       <Grid container>
@@ -132,67 +115,13 @@ const FlightResult = () => {
           <BaseHeader title="airXplora : Your Travel Tech Companion" />
         </Grid>
         <Grid item xs={12}>
-          <AboutFlight />
-        </Grid>
-        <Grid item xs={12}>
-          <FareCalendar prevState={prevState} lastSearch={lastSearch} />
-        </Grid>
-        <Grid item container>
-          {isDesktop ? (
-            <Grid item xs={12} md={3} className={classes.filterbox}>
-              <Filter isMobile={false} />
-            </Grid>
+          {data ? (
+            <AboutFlight prevState={data.prevState} />
           ) : (
-            <Grid item xs={12} md={3}>
-              <Filter isMobile={true} />
-            </Grid>
+            <Skeleton variant="rect" height={118} />
           )}
-          <Grid item xs={12} md={9} className={classes.resultcard}>
-            {flightOffers.length === 0 ? (
-              <Typography variant="h4">
-                OOps, no result found. Please modify your search terms
-              </Typography>
-            ) : (
-              <>
-                {flightOffers.map((flightOffer, index) => (
-                  <LazyLoad
-                    key={flightOffer.id}
-                    height={150}
-                    offset={400}
-                    //  unmountIfInvisible
-                    placeholder={
-                      <Container className={classes.placeholdercontainer}>
-                        <Box p={3}>
-                          <Skeleton variant="rect" height={150} />
-                        </Box>
-                      </Container>
-                    }
-                  >
-                    <Box py={1}>
-                      <Box onClick={() => toggleDrawer(flightOffer)}>
-                        <ResultCard flightOffer={flightOffer} />
-                      </Box>
-                    </Box>
-                  </LazyLoad>
-                ))}
-                <Drawer
-                  className={classes.drawer}
-                  anchor="right"
-                  open={isDrawerOpen}
-                  ModalProps={{
-                    keepMounted: false,
-                    onBackdropClick: () => toggleDrawerState((prev) => !prev),
-                  }}
-                  transitionDuration={250}
-                >
-                  <Container>
-                    <FlightSumarry flightOffer={stateFlightOffer} />
-                  </Container>
-                </Drawer>
-              </>
-            )}
-          </Grid>
         </Grid>
+        {data ? <FlightOffersList storeData={data} /> : ""}
         <Grid item xs={12}>
           <ClassicFooter />
         </Grid>
