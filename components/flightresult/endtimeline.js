@@ -51,17 +51,19 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const EndTimeline = ({lastSegment}) => {
+const EndTimeline = ({ lastSegment }) => {
   const classes = styles();
-/*   const flightOffer = useRecoilValue(flightOffer_);
+  /*   const flightOffer = useRecoilValue(flightOffer_);
   const lastSegment =
     flightOffer.itineraries[0].segments[
       flightOffer.itineraries[0].segments.length - 1
     ]; */
 
- //console.log("lastSegment", lastSegment);
+  //console.log("lastSegment", lastSegment);
 
- // console.log("endtimeline flightOffer", flightOffer);
+  // console.log("endtimeline flightOffer", flightOffer);
+  if (!lastSegment) return <>Loading ...</>;
+
   return (
     <TimelineItem>
       <TimelineOppositeContent

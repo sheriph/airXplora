@@ -76,13 +76,16 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const InboundFlight = () => {
+const InboundFlight = ({ flightOffer }) => {
   const classes = styles();
   const prevState = useRecoilValue(prevState_);
-  const flightOffer = useRecoilValue(flightOffer_);
+  // const flightOffer = useRecoilValue(flightOffer_);
+
+  if (!flightOffer) return <>Loading ...</>;
+
   const inBoundItinerary = flightOffer.itineraries[1];
- // console.log("prevState1", prevState);
- // console.log("outBoundItinerary", outBoundItinerary);
+  // console.log("prevState1", prevState);
+  // console.log("outBoundItinerary", outBoundItinerary);
   return (
     <React.Fragment>
       <Container disableGutters className={classes.inboundcontainer}>
@@ -124,9 +127,9 @@ const InboundFlight = () => {
           </Grid>
           <Grid item xs={12}>
             <Timeline classes={{ root: classes.timelineroot }} align="left">
-              <BeginTimeline2 />
-              <StopoverTimeline2 />
-              <EndTimeline2 />
+              <BeginTimeline2 flightOffer={flightOffer} />
+              <StopoverTimeline2 flightOffer={flightOffer} />
+              <EndTimeline2 flightOffer={flightOffer} />
             </Timeline>
           </Grid>
           {/*  <Grid item xs={12} className = {classes.booknowbottom}>

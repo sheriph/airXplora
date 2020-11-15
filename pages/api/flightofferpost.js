@@ -11,7 +11,7 @@ export default function (req, res) {
     .then(function (response) {
       res.send(response.data);
     })
-    .catch(function (responseError) {
-      res.send(responseError);
+    .catch(function (error) {
+      res.send({ type: "error", error });
     });
 }

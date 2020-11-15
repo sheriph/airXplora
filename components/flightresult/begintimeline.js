@@ -80,6 +80,7 @@ const BeginTimeline = ({ outBoundItinerary, flightOffer }) => {
   ); */
 
   // console.log("flightOffer begin", flightOffer)
+  if (!flightOffer || !outBoundItinerary) return <>Loading ...</>;
 
   return (
     <TimelineItem>

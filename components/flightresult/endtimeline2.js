@@ -51,9 +51,12 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const EndTimeline2 = () => {
+const EndTimeline2 = ({ flightOffer }) => {
   const classes = styles();
-  const flightOffer = useRecoilValue(flightOffer_);
+//  const flightOffer = useRecoilValue(flightOffer_);
+
+if (!flightOffer) return <>Loading ...</>;
+
   const lastSegment =
     flightOffer.itineraries[1].segments[
       flightOffer.itineraries[1].segments.length - 1

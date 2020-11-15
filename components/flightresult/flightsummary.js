@@ -96,6 +96,7 @@ const FlightSumarry = ({ flightOffer }) => {
   const [isDrawerOpen, toggleDrawerState] = useRecoilState(isDrawerOpen_);
   const prevState = useRecoilValue(prevState_);
 
+  if (!flightOffer) return <>Loading ...</>;
   return (
     <React.Fragment>
       <Container disableGutters className={classes.container}>

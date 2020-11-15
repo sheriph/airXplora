@@ -38,7 +38,7 @@ const HeroMobileCard = ({ flightOffer }) => {
 
   const itineraries = flightOffer.itineraries;
   return (
-    <Container>
+    <Container disableGutters>
       <Card>
         <CardActionArea>
           <CardContent>

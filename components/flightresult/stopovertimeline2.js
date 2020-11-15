@@ -71,9 +71,13 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const StopoverTimeline2 = () => {
+const StopoverTimeline2 = ({ flightOffer }) => {
   const classes = styles();
-  const flightOffer = useRecoilValue(flightOffer_);
+//  const flightOffer = useRecoilValue(flightOffer_);
+
+
+if (!flightOffer) return <>Loading ...</>;
+
   const inBoundSegments = flightOffer.itineraries[1].segments;
   //  console.log("inBoundSegments stop", inBoundSegments, flightOffer);
   const [stopsArray, setStopsArray] = useState([]);

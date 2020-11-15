@@ -36,6 +36,7 @@ import { useCollection, useDocument } from "@nandorojo/swr-firestore";
 import Axios from "axios";
 import LazyLoad from "react-lazyload";
 import Skeleton from "@material-ui/lab/Skeleton";
+import FareCalendar from "../components/flightresult/farecalendar";
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -58,7 +59,6 @@ const styles = makeStyles((theme) => ({
       backgroundColor: "rgba(0, 0, 0, 0.1)",
     },
   },
-  drawerContainer: {},
   container: {
     backgroundColor: theme.palette.grey[200],
   },
@@ -114,8 +114,8 @@ const FlightResult = () => {
       url: "/api/flightofferpost",
     })
       .then((res) => {
-        console.log("response", res);
-
+        if (res.type === "error") throw new Error(res.error);
+        
         setLastSearch(data.lastSearch);
         setPrevState(data.prevState);
         setFlightOffers(res.data);
@@ -133,6 +133,9 @@ const FlightResult = () => {
         </Grid>
         <Grid item xs={12}>
           <AboutFlight />
+        </Grid>
+        <Grid item xs={12}>
+          <FareCalendar prevState={prevState} lastSearch={lastSearch} />
         </Grid>
         <Grid item container>
           {isDesktop ? (
@@ -155,8 +158,8 @@ const FlightResult = () => {
                   <LazyLoad
                     key={flightOffer.id}
                     height={150}
-                    offset={500}
-                    unmountIfInvisible
+                    offset={400}
+                    //  unmountIfInvisible
                     placeholder={
                       <Container className={classes.placeholdercontainer}>
                         <Box p={3}>
@@ -182,7 +185,7 @@ const FlightResult = () => {
                   }}
                   transitionDuration={250}
                 >
-                  <Container className={classes.drawerContainer}>
+                  <Container>
                     <FlightSumarry flightOffer={stateFlightOffer} />
                   </Container>
                 </Drawer>
