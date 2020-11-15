@@ -5,7 +5,14 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { Badge, Box, Button, ButtonBase, Grid } from "@material-ui/core";
+import {
+  Badge,
+  Box,
+  Button,
+  ButtonBase,
+  Container,
+  Grid,
+} from "@material-ui/core";
 import SelectAllIcon from "@material-ui/icons/SelectAll";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { lowestValue_ } from "../../recoil/state";
@@ -28,48 +35,50 @@ export default function PricingTable({ component, flightOffer }) {
   const currentPrice = Number(flightOffer.price.total);
 
   return (
-    <Accordion>
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1a-content"
-        id="panel1a-header"
-      >
-        <Button
-          disableFocusRipple={true}
-          disableRipple={true}
-          disableTouchRipple={true}
-          startIcon={
-            currentPrice < lowestValue ? (
-              <>
-                <SelectAllIcon color="primary" />
-              </>
+    <Container disableGutters>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Button
+            disableFocusRipple={true}
+            disableRipple={true}
+            disableTouchRipple={true}
+            startIcon={
+              currentPrice < lowestValue ? (
+                <>
+                  <SelectAllIcon color="primary" />
+                </>
+              ) : (
+                <>
+                  <Badge badgeContent={1} color="primary">
+                    <NotificationsIcon />
+                  </Badge>
+                </>
+              )
+            }
+            classes={{ text: classes.buttontext }}
+          >
+            {currentPrice < lowestValue ? (
+              "Pricing Table"
             ) : (
               <>
-                <Badge badgeContent={1} color="primary">
-                  <NotificationsIcon />
-                </Badge>
+                Get Cheaper options
+                {lowestValue ? (
+                  <> from &#8358;{formatPrice(lowestValue)}</>
+                ) : (
+                  " Here"
+                )}
               </>
-            )
-          }
-          classes={{ text: classes.buttontext }}
-        >
-          {currentPrice < lowestValue ? (
-            "Pricing Table"
-          ) : (
-            <>
-              Get Cheaper options
-              {lowestValue ? (
-                <> from &#8358;{formatPrice(lowestValue)}</>
-              ) : (
-                " Here"
-              )}
-            </>
-          )}
-        </Button>
-      </AccordionSummary>
-      <AccordionDetails classes={{ root: classes.root }}>
-        {component}
-      </AccordionDetails>
-    </Accordion>
+            )}
+          </Button>
+        </AccordionSummary>
+        <AccordionDetails classes={{ root: classes.root }}>
+          {component}
+        </AccordionDetails>
+      </Accordion>
+    </Container>
   );
 }
