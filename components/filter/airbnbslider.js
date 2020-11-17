@@ -59,11 +59,13 @@ function AirbnbThumbComponent(props) {
 }
 
 export default function MyAirbnbSlider({ range, priceCount }) {
+  if (!range) return <>Range not definded</>;
   const [value, setValue] = useState(range);
   const [filterRange, setFilterRange] = useRecoilState(priceFilterValue_);
 
   useEffect(() => {
     if (filterRange) {
+      console.log("reseting price");
       setValue(range);
       setFilterRange(undefined);
     }
@@ -85,12 +87,13 @@ export default function MyAirbnbSlider({ range, priceCount }) {
         }
         value={value}
         onChange={(e, v) => {
-          setValue(v);
+          setValue([...v]);
         }}
         //   onChangeCommitted={(e, v) => handleChangeCommited(v)}
         max={range[1]}
         min={range[0]}
         onMouseUp={() => setFilterRange([...value])}
+        onPointerUp={() => setFilterRange([...value])}
         //   defaultValue={value}
       />
     </Container>

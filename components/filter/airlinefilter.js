@@ -28,8 +28,8 @@ const AirlineFilter = ({ count, airlinesList }) => {
     let newAirline = { ...airline, isSelected: !airline.isSelected };
     let newAirlinesFilter = [...airlinesFilter];
     newAirlinesFilter[index] = newAirline;
-    setAirlinesFilter(newAirlinesFilter);
     setStateAirlinesFilter(newAirlinesFilter);
+    setAirlinesFilter(newAirlinesFilter, );
   };
 
   useEffect(() => {

@@ -160,7 +160,7 @@ const AboutFlight = ({prevState}) => {
           </Grid>
         </Grid>
       </Container>
-      <Collapse in={openCollapse} timeout={1500} unmountOnExit>
+      <Collapse in={openCollapse} timeout={250} unmountOnExit>
         <Grid container className={classes.gridcontainer}>
           <Grid item>
             <FlightFinder />
