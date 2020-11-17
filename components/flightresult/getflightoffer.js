@@ -66,13 +66,10 @@ const fetcher = async (...arg) => {
     url: "/api/flightofferpost",
   })
     .then((res) => {
-      // console.log("response", res);
-      if (res.data[0]) {
-        //  console.log("res.data[0]", res.data[0]);
-        return res.data[0];
-      } else {
-        throw new Error();
-      }
+      const { type, error } = res.data;
+      if (type === "error") throw new Error(error);
+      else if (res.data[0]) return res.data[0];
+      else throw new Error("error: Empty flightOffer response");
     })
     .catch((err) => {
       console.log(err);

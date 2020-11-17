@@ -68,7 +68,10 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
   const [countStops, setCountStops] = useState(1);
   const [priceCount, setPriceCount] = useState(1);
   const stateStops = useRecoilValue(stops_);
-  const stateAirlinesFilter = useRecoilValue(airlinesFilter_);
+  //const stateAirlinesFilter = useRecoilValue(airlinesFilter_);
+  const [stateAirlinesFilter, setAirlineFilter] = useRecoilState(
+    airlinesFilter_
+  );
   const [priceDrawer, setPriceDrawer] = useState(false);
   const [airlinesDrawer, setAirlinesDrawer] = useState(false);
   const [stopsDrawer, setStopsDrawer] = useState(false);
@@ -77,7 +80,13 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
     setLoading(true);
     let t0 = performance.now();
     let worker = new Worker();
-    console.log("gettign return");
+    console.log("sent to worker", {
+      flightOffers: defaultFlightOffers,
+      filterRange: filterRange,
+      stateAirlinesFilter: stateAirlinesFilter,
+      stateStops: stateStops,
+    });
+
     worker.postMessage({
       flightOffers: defaultFlightOffers,
       filterRange: filterRange,
@@ -85,13 +94,9 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
       stateStops: stateStops,
     });
     worker.addEventListener("message", (e) => {
-      // console.log("what have we here", e.data);
-
       let t1 = performance.now();
       console.log("time used by filter", e.data, t1 - t0);
-      //    setFlightOffers(e.data);
-      //  mutate(e.data, false);
-      console.log("response", e.data);
+      console.log(" worker response", e.data);
       updateData(e.data);
       setLoading(false);
       forceCheck();
@@ -99,28 +104,27 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
   };
 
   const handlePriceReset = () => {
+    setLoading(true);
     let t0 = performance.now();
     let worker = new Worker();
     worker.postMessage({
-      flightOffers: pureFlightOffers,
+      flightOffers: defaultFlightOffers,
       filterRange: undefined,
       stateAirlinesFilter: stateAirlinesFilter,
       stateStops: stateStops,
     });
     worker.addEventListener("message", (e) => {
-      // console.log("what have we here", e.data);
-
       let t1 = performance.now();
       console.log("time used by filter", t1 - t0);
-      //  setFilterRange(getMaxAndMinPriceArray(pureFlightOffers));
-      //setRange(getMaxAndMinPriceArray(pureFlightOffers));
-      setFlightOffers(e.data);
+      updateData(e.data);
+      setLoading(false);
+      forceCheck();
+      setPriceCount((prev) => prev + 1);
     });
-    setPriceCount((prev) => prev + 1);
   };
 
   const handleAirlineReset = () => {
-    setCount((p) => p + 1);
+    setLoading(true);
     let t0 = performance.now();
     let worker = new Worker();
     worker.postMessage({
@@ -130,15 +134,17 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
       stateStops: stateStops,
     });
     worker.addEventListener("message", (e) => {
-      // console.log("what have we here", e.data);
-
       let t1 = performance.now();
       console.log("time used by filter", t1 - t0);
-      setFlightOffers(e.data);
+      updateData(e.data);
+      setLoading(false);
+      forceCheck();
+      setCount((p) => p + 1);
     });
   };
 
   const handleStopsReset = () => {
+    setLoading(true);
     let t0 = performance.now();
     let worker = new Worker();
     worker.postMessage({
@@ -148,13 +154,13 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
       stateStops: [{ type: "Any", isSelected: true }],
     });
     worker.addEventListener("message", (e) => {
-      // console.log("what have we here", e.data);
-
       let t1 = performance.now();
       console.log("time used by filter", t1 - t0);
-      setFlightOffers(e.data);
+      updateData(e.data);
+      setLoading(false);
+      forceCheck();
+      setCountStops((prev) => prev + 1);
     });
-    setCountStops((prev) => prev + 1);
   };
 
   /*  useEffect(() => {

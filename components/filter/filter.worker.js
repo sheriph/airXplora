@@ -10,7 +10,7 @@ self.addEventListener("message", function (e) {
 
   setTimeout(() => {
     self.postMessage(airlineSortedData);
-  }, 2000);
+  }, 1000);
 });
 
 const sortByPrice = (flightOffers, filterRange) => {

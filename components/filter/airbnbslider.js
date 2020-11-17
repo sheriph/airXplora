@@ -63,12 +63,13 @@ export default function MyAirbnbSlider({ range, priceCount }) {
   const [value, setValue] = useState(range);
   const [filterRange, setFilterRange] = useRecoilState(priceFilterValue_);
 
-/*   useEffect(() => {
+  useEffect(() => {
     if (filterRange) {
+      console.log("reseting price");
       setValue(range);
       setFilterRange(undefined);
     }
-  }, [priceCount]); */
+  }, [priceCount]);
 
   return (
     <Container>
@@ -92,6 +93,7 @@ export default function MyAirbnbSlider({ range, priceCount }) {
         max={range[1]}
         min={range[0]}
         onMouseUp={() => setFilterRange([...value])}
+        onPointerUp={() => setFilterRange([...value])}
         //   defaultValue={value}
       />
     </Container>

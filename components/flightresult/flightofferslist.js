@@ -165,7 +165,7 @@ const FlightOffersList = ({ storeData }) => {
         {isDesktop ? (
           <Grid item xs={12} md={3} className={classes.filterbox}>
             <Filter
-              mutate={mutate}
+              // mutate={mutate}
               defaultFlightOffers={data}
               isMobile={false}
             />
@@ -173,7 +173,7 @@ const FlightOffersList = ({ storeData }) => {
         ) : (
           <Grid item xs={12} md={3}>
             <Filter
-              updateData={setRenderedData}
+              // updateData={setRenderedData}
               defaultFlightOffers={data}
               isMobile={true}
             />
@@ -186,39 +186,41 @@ const FlightOffersList = ({ storeData }) => {
             </Typography>
           ) : (
             <>
-              {uidata.map((flightOffer, index) => (
-                <LazyLoad
-                  key={flightOffer.id}
-                  height={150}
-                  offset={300}
-                  //  unmountIfInvisible
-                  placeholder={
-                    <Container className={classes.placeholdercontainer}>
-                      <Box p={3}>
-                        <Skeleton variant="rect" height={150} />
-                      </Box>
-                    </Container>
-                  }
-                  scroll
-                >
-                  <Box py={1}>
-                    {isLoading ? (
-                      <Skeleton
-                        className={classes.skeletonpad}
-                        key={index}
-                        width="100%"
-                        height={200}
-                        variant="rect"
-                        component={Paper}
-                      />
-                    ) : (
-                      <Box onClick={() => toggleDrawer(flightOffer)}>
-                        <ResultCard flightOffer={flightOffer} />
-                      </Box>
-                    )}
-                  </Box>
-                </LazyLoad>
-              ))}
+              {uidata.map((flightOffer, index) => {
+                return (
+                  <LazyLoad
+                    key={flightOffer.id}
+                    height={150}
+                    offset={300}
+                    //  unmountIfInvisible
+                    placeholder={
+                      <Container className={classes.placeholdercontainer}>
+                        <Box p={3}>
+                          <Skeleton variant="rect" height={150} />
+                        </Box>
+                      </Container>
+                    }
+                    scroll
+                  >
+                    <Box py={1}>
+                      {isLoading ? (
+                        <Skeleton
+                          className={classes.skeletonpad}
+                          key={index}
+                          width="100%"
+                          height={200}
+                          variant="rect"
+                          component={Paper}
+                        />
+                      ) : (
+                        <Box onClick={() => toggleDrawer(flightOffer)}>
+                          <ResultCard flightOffer={flightOffer} />
+                        </Box>
+                      )}
+                    </Box>
+                  </LazyLoad>
+                );
+              })}
               <Drawer
                 className={classes.drawer}
                 anchor="right"
