@@ -11,7 +11,7 @@ module.exports = (nextConfig = {}) => {
         test: /\.worker\.(js|ts)$/,
         loader: "worker-loader",
         options: nextConfig.workerLoaderOptions || {
-       //   name: "static/[hash].worker.js",
+          name: "static/[hash].worker.js",
           publicPath: "/_next/",
         },
       });

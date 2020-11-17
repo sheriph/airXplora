@@ -305,6 +305,11 @@ export const lowestValue_ = atom({
   default: undefined,
 });
 
+export const isLoading_ = atom({
+  key: "isloading",
+  default: false,
+});
+
 //test data //
 
 /* export const flightOffers_ = atom({

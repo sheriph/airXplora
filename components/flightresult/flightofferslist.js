@@ -22,8 +22,13 @@ import LazyLoad from "react-lazyload";
 import Skeleton from "@material-ui/lab/Skeleton";
 import FareCalendar from "../flightresult/farecalendar";
 import PricingTable from "../flightresult/pricingtable";
-import { isDrawerOpen_ } from "../../recoil/state";
-import { useRecoilState } from "recoil";
+import {
+  flightOffers_,
+  flightOffer_,
+  isDrawerOpen_,
+  isLoading_,
+} from "../../recoil/state";
+import { useRecoilState, useRecoilValue } from "recoil";
 import Filter from "../filter/filter";
 
 const styles = makeStyles((theme) => ({
@@ -79,7 +84,11 @@ const fetcher = async (...arg) => {
 };
 
 const FlightOffersList = ({ storeData }) => {
-  const { data, error, isValidating } = useSWR(
+  const [rd, setRenderedData] = useRecoilState(flightOffers_);
+  const isLoading = useRecoilValue(isLoading_);
+  const uidata = useRecoilValue(flightOffers_);
+
+  const { data, error, isValidating, mutate } = useSWR(
     ["/api/flightofferpost", JSON.stringify(storeData.lastSearch)],
     fetcher,
     {
@@ -95,7 +104,9 @@ const FlightOffersList = ({ storeData }) => {
       },
       onSuccess: (data) => {
         console.log("on success flightoffers data", data);
+        setRenderedData(data);
       },
+      //  initialData: defaultData,
     }
   );
 
@@ -111,7 +122,8 @@ const FlightOffersList = ({ storeData }) => {
   };
 
   if (error) return <>Ouch, something went wrong....</>;
-  if (!data)
+
+  if (!data || !uidata)
     return (
       <>
         {[1, 2, 3, 5, 5].map((item, index) => (
@@ -123,10 +135,18 @@ const FlightOffersList = ({ storeData }) => {
             variant="rect"
             component={Paper}
           />
-        ))}{" "}
+        ))}
       </>
     );
 
+  if (data.length === 0)
+    return (
+      <>
+        <Typography>
+          Oops, Zero airlines found, please modify your search terms{" "}
+        </Typography>
+      </>
+    );
 
   return (
     <>
@@ -144,25 +164,33 @@ const FlightOffersList = ({ storeData }) => {
       <Grid item container>
         {isDesktop ? (
           <Grid item xs={12} md={3} className={classes.filterbox}>
-            <Filter defaultFlightOffers={data} isMobile={false} />
+            <Filter
+              mutate={mutate}
+              defaultFlightOffers={data}
+              isMobile={false}
+            />
           </Grid>
         ) : (
           <Grid item xs={12} md={3}>
-            <Filter defaultFlightOffers={data} isMobile={true} />
+            <Filter
+              updateData={setRenderedData}
+              defaultFlightOffers={data}
+              isMobile={true}
+            />
           </Grid>
         )}
         <Grid item xs={12} md={9} className={classes.resultcard}>
-          {data.length === 0 ? (
+          {uidata.length === 0 ? (
             <Typography variant="h4">
               OOps, no result found. Please modify your search terms
             </Typography>
           ) : (
             <>
-              {data.map((flightOffer, index) => (
+              {uidata.map((flightOffer, index) => (
                 <LazyLoad
                   key={flightOffer.id}
                   height={150}
-                  offset={400}
+                  offset={300}
                   //  unmountIfInvisible
                   placeholder={
                     <Container className={classes.placeholdercontainer}>
@@ -171,11 +199,23 @@ const FlightOffersList = ({ storeData }) => {
                       </Box>
                     </Container>
                   }
+                  scroll
                 >
                   <Box py={1}>
-                    <Box onClick={() => toggleDrawer(flightOffer)}>
-                      <ResultCard flightOffer={flightOffer} />
-                    </Box>
+                    {isLoading ? (
+                      <Skeleton
+                        className={classes.skeletonpad}
+                        key={index}
+                        width="100%"
+                        height={200}
+                        variant="rect"
+                        component={Paper}
+                      />
+                    ) : (
+                      <Box onClick={() => toggleDrawer(flightOffer)}>
+                        <ResultCard flightOffer={flightOffer} />
+                      </Box>
+                    )}
                   </Box>
                 </LazyLoad>
               ))}

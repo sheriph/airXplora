@@ -85,9 +85,9 @@ const FlightResult = () => {
     toggleDrawerState((prev) => !prev);
   };
 
-  const { data, set, update } = useDocument("flightData/stateData", {
+  const { data, error, set, update } = useDocument("flightData/stateData", {
     onSuccess: (data) => {
-      //   console.log("data from store:", data);
+      console.log("data from store:", data);
     },
     parseDates: [
       "prevState.departureDate",
@@ -107,6 +107,8 @@ const FlightResult = () => {
       console.log("slow network detected");
     },
   });
+
+  console.log("data", data, error);
 
   return (
     <Container disableGutters maxWidth="xl" className={classes.container}>

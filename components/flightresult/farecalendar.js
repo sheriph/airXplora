@@ -20,6 +20,8 @@ import Axios from "axios";
 import { useRecoilState } from "recoil";
 import { fullReturn_ } from "../../recoil/state";
 import MatrixItem from "./matrixitem";
+import LazyLoad from "react-lazyload";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 const styles = makeStyles((theme) => ({
   table: {
@@ -45,7 +47,6 @@ export default function FareCalendar({ prevState, lastSearch }) {
   );
   const [count, setCount] = useState(1);
   const [fullMatrix, setFullMatrix] = useState([]);
-
 
   useEffect(() => {
     console.log("fetching matrix....");
@@ -116,15 +117,23 @@ export default function FareCalendar({ prevState, lastSearch }) {
                       {data}
                     </Typography>
                   ) : (
-                    <GetFlightOffer
-                      departureDate={data.departure}
-                      returnDate={
-                        prevState.tripType === "Round trip"
-                          ? data.return
-                          : undefined
-                      }
-                      lastSearch={data.lastSearch}
-                    />
+                    <LazyLoad
+                      width={10}
+                      height={10}
+                      unmountIfInvisible
+                      placeholder={<Skeleton variant="text" width="100%" />}
+                      overflow
+                    >
+                      <GetFlightOffer
+                        departureDate={data.departure}
+                        returnDate={
+                          prevState.tripType === "Round trip"
+                            ? data.return
+                            : undefined
+                        }
+                        lastSearch={data.lastSearch}
+                      />
+                    </LazyLoad>
                   )}
                 </TableCell>
               ))}

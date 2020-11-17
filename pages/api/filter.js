@@ -1,18 +1,3 @@
-self.addEventListener("message", function (e) {
-  console.log("postedData", e.data);
-  let airlineSortedData = sortByStops(
-    sortByPrice(
-      sortByAirlines(e.data.flightOffers, e.data.stateAirlinesFilter),
-      e.data.filterRange
-    ),
-    e.data.stateStops
-  );
-
-  setTimeout(() => {
-    self.postMessage(airlineSortedData);
-  }, 2000);
-});
-
 const sortByPrice = (flightOffers, filterRange) => {
   console.log(" by price", flightOffers, filterRange);
   if (!filterRange) return flightOffers;
@@ -24,7 +9,7 @@ const sortByPrice = (flightOffers, filterRange) => {
   );
 };
 
-export const sortByAirlines = (flightOffers, stateAirlinesFilter) => {
+const sortByAirlines = (flightOffers, stateAirlinesFilter) => {
   console.log(" by airline", flightOffers, stateAirlinesFilter);
   if (!stateAirlinesFilter) return flightOffers;
   const airlineFilterArray = stateAirlinesFilter
@@ -40,7 +25,7 @@ export const sortByAirlines = (flightOffers, stateAirlinesFilter) => {
   });
 };
 
-export const sortByStops = (flightOffers, stateStops) => {
+const sortByStops = (flightOffers, stateStops) => {
   console.log("by stops", flightOffers, stateStops);
   let stopsArray = stateStops
     .filter((item) => item.isSelected)
@@ -66,3 +51,21 @@ export const sortByStops = (flightOffers, stateStops) => {
     }
   });
 };
+
+export default function (req, res) {
+  const {
+    flightOffers,
+    stateAirlinesFilter,
+    stateStops,
+    filterRange,
+  } = req.body;
+
+  let airlineSortedData = sortByStops(
+    sortByPrice(sortByAirlines(flightOffers, stateAirlinesFilter), filterRange),
+    stateStops
+  );
+
+  res.send(airlineSortedData);
+
+  // setTimeout(() => {res.send}, 2000);
+}
