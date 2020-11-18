@@ -31,6 +31,8 @@ export default function MyApp(props) {
       ? "https://airxplora.vercel.app/"
       : "http://localhost:3000";
 
+  // Axios.defaults.baseURL = "http://localhost:3000";
+
   React.useEffect(() => {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector("#jss-server-side");
