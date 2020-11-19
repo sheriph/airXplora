@@ -10,9 +10,11 @@ import SelectAllIcon from "@material-ui/icons/SelectAll";
 
 const styles = makeStyles((theme) => ({
   buttontext: {
-    fontSize: "13px"
-  }
+    fontSize: "13px",
+  },
 }));
+
+//console.log(process.env.NEXT_PUBLIC_ANALYTICS_ID);
 
 export default function PricingTable() {
   const classes = styles();
@@ -29,7 +31,7 @@ export default function PricingTable() {
           disableRipple={true}
           disableTouchRipple={true}
           startIcon={<SelectAllIcon color="primary" />}
-          classes = {{text: classes.buttontext}}
+          classes={{ text: classes.buttontext }}
         >
           Pricing Table
         </Button>
