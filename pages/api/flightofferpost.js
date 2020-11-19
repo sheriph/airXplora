@@ -1,5 +1,5 @@
 var Amadeus = require("amadeus");
-const { CLIENT_ID, CLIENT_SECRET } = require("../../config");
+const { CLIENT_ID, CLIENT_SECRET } = process.env;
 var amadeus = new Amadeus({
   clientId: CLIENT_ID,
   clientSecret: CLIENT_SECRET,
