@@ -23,6 +23,7 @@ import { ClickAwayListener } from "@material-ui/core";
 import ResultCard from "./classsicresultcard";
 import CancelIcon from "@material-ui/icons/Cancel";
 import FlightSumarry from "./flightsummary";
+const qs = require("qs");
 
 const styles = makeStyles((theme) => ({
   typographyhighest: {
@@ -58,7 +59,7 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const fetcher = async (...arg) => {
+/* const fetcher = async (...arg) => {
   // console.log("url, lastSearch", arg);
   const data = await Axios({
     data: JSON.parse(arg[3]),
@@ -76,7 +77,7 @@ const fetcher = async (...arg) => {
       return null;
     });
   return data;
-};
+}; */
 
 const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   const classes = styles();
@@ -84,6 +85,71 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   const matrixPriceSub = useRecoilValue(matrixPrice_);
   const [lv, setLowestValue] = useRecoilState(lowestValue_);
   const lowestValue = useRecoilValue(lowestValue_);
+
+  const axiosToken = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  const axiosFlightOffer = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v2/shopping/flight-offers",
+  });
+
+  axiosFlightOffer.interceptors.request.use(
+    (req) => {
+      req.headers = {
+        Authorization: `Bearer ${window.sessionStorage.getItem("accessToken")}`,
+        "Content-Type": "application/json",
+      };
+      return req;
+    },
+    (error) => {
+      Promise.reject(error);
+    }
+  );
+
+  axiosFlightOffer.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+      if (
+        error.response &&
+        error.response.config &&
+        error.response.status === 401
+      ) {
+        await axiosToken
+          .request({
+            data: qs.stringify({
+              client_id: " kYUgZVtfSuy1NmE3kzGwtubzWGteoK1z",
+              client_secret: "KDvXBul4gw1pL6rg",
+              grant_type: "client_credentials",
+            }),
+          })
+          .then((res) => {
+            console.log("token at response interceptor", res.data.access_token);
+            window.sessionStorage.setItem("accessToken", res.data.access_token);
+          })
+          .catch((err) => console.log(err.response));
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  const fetcher = async (...arg) => {
+    const res = await axiosFlightOffer.request({ data: arg[3] });
+    if (
+      res.status !== 200 ||
+      !res.data ||
+      !res.data.data ||
+      !res.data.data[0]
+    ) {
+      throw new Error("response status not correct");
+    }
+    return res.data.data[0];
+  };
 
   const { data, error, isValidating } = useSWR(
     [
@@ -98,19 +164,24 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       refreshInterval: 86400000,
-      dedupingInterval: 86400000,
-      errorRetryInterval: 1000,
-      errorRetryCount: 12,
+      // dedupingInterval: 86400000,
+      errorRetryInterval: 7000,
+      shouldRetryOnError: true,
+      errorRetryCount: 5,
       onLoadingSlow: () => {
-        console.log("slow network detected");
+      },
+      onError: (error) => {
       },
       onSuccess: (data) => {
-        if (typeof data.price.total !== "string") return;
+        if (typeof data.price.total !== "string") {
+          throw new Error("cant find price");
+        }
         let set = new Set(matrixPriceSub);
         set.add(data.price.total);
         setMatrixPrice(Array.from(set));
         setLowestValue(Math.min(...matrixPriceSub));
       },
+      //  initialData: defaultData,
     }
   );
 

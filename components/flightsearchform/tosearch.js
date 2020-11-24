@@ -23,8 +23,21 @@ import CloseIcon from "@material-ui/icons/Close";
 import WarningIcon from "@material-ui/icons/Warning";
 import { prettyWord } from "../../components/general/utilities";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { to_, from1_, trip_, toLocal_, fromLocal1_, tocity_ } from "../../recoil/state";
+import {
+  to_,
+  from1_,
+  trip_,
+  toLocal_,
+  fromLocal1_,
+  tocity_,
+} from "../../recoil/state";
 import Skeleton from "@material-ui/lab/Skeleton";
+import useSWR from "swr";
+const qs = require("qs");
+
+
+
+
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -50,10 +63,7 @@ const style = makeStyles((theme) => ({
 const ToSearch = () => {
   const classes = style();
   const [to, setTo] = useRecoilState(to_);
-  const [toCity, setToCity] = useRecoilState(tocity_)
-
-
-  
+  const [toCity, setToCity] = useRecoilState(tocity_);
   const [toLocal, setToLocal] = useRecoilState(toLocal_);
   const [nextFrom, setNextFrom] = useRecoilState(from1_);
   const [nextFromLocal, setNextFromLocal] = useRecoilState(fromLocal1_);
@@ -64,58 +74,123 @@ const ToSearch = () => {
   const [isloading, setIsLoading] = useState(false);
   const source = Axios.CancelToken.source();
 
+
+
+  
+  const axiosToken = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  const axiosAirportNames = Axios.create({
+    method: "get",
+    baseURL: "https://test.api.amadeus.com/v1/reference-data",
+  });
+
+  axiosAirportNames.interceptors.request.use(
+    (req) => {
+    //  console.log("req at req interceptor", req);
+      if (!toLocal) {
+        throw new Error(toLocal);
+      }
+      req.headers = {
+        Authorization: `Bearer ${window.sessionStorage.getItem("accessToken")}`,
+      };
+      return req;
+    },
+    (error) => {
+   //   console.log("rejecting request b4 its sent");
+      Promise.reject(error);
+    }
+  );
+
+  axiosAirportNames.interceptors.response.use(
+    (res) => {
+      if (res.status !== 200 || !res.data || !res.data.data) {
+        throw new Error("error response in interceptor", res.statusText);
+      }
+      const suggestionList = [];
+      for (let item of res.data.data) {
+        let autosuggestObj = {
+          id: item.id,
+          iataCode: item.iataCode,
+          subType: item.subType,
+          iataCodeCityName: `${item.iataCode} ${prettyWord(
+            item.address.cityName
+          )}`,
+          city: `${prettyWord(item.address.cityName)}`,
+          cityIata: `${prettyWord(item.address.cityName)} (${item.iataCode})`,
+          details: `${item.iataCode} ${prettyWord(item.name)}`,
+          countryName: `${prettyWord(item.address.countryName)}`,
+        };
+        suggestionList.push(autosuggestObj);
+      }
+      return suggestionList;
+    },
+    async (error) => {
+      if (
+        error.response &&
+        error.response.config &&
+        error.response.status === 401
+      ) {
+        await axiosToken
+          .request({
+            data: qs.stringify({
+              client_id: " kYUgZVtfSuy1NmE3kzGwtubzWGteoK1z",
+              client_secret: "KDvXBul4gw1pL6rg",
+              grant_type: "client_credentials",
+            }),
+          })
+          .then((res) => {
+            console.log("token at response interceptor", res.data.access_token);
+            window.sessionStorage.setItem("accessToken", res.data.access_token);
+          })
+          .catch((err) => console.log(err.response));
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  const fetcher = async (toLocal) => {
+    const res = await axiosAirportNames.request({
+      url: `/locations?subType=CITY,AIRPORT&keyword=${toLocal}`,
+    });
+  //  console.log("res in fetcher", res);
+    return res;
+  };
+
+  const { data, error, isValidating, mutate } = useSWR(toLocal, fetcher, {
+    focusThrottleInterval: 86400000,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    refreshInterval: 86400000,
+    shouldRetryOnError: true,
+    errorRetryCount: 5,
+    errorRetryInterval: 3000,
+    onLoadingSlow: () => {
+      //  console.log("slow network detected");
+    },
+    onError: (error) => {
+   //   console.log("error from fetcher", error);
+    },
+    onSuccess: (data) => {
+   //   console.log("success data", data);
+      //   setFromArray(data);
+    },
+  });
+
+//  console.log("toLocal", toLocal, isValidating, data, error);
+
+
   const handleToChange = (e) => {
     setToLocal(e.target.value);
     setOpenSuggestionsPaper(true);
-    if (!toLocal) {
-      return;
+    if (isValidating === false) {
+      if (data === undefined && e.target.value) mutate();
     }
-
-    if (isloading === true) {
-      source.cancel("operation cancelled");
-    }
-
-    setIsLoading(true);
-    Axios({
-      method: "post",
-      url: "/api/airportautosuggest",
-      cancelToken: source.token,
-      data: {
-        keyword: toLocal,
-        subType: "AIRPORT,CITY",
-      },
-    })
-      .then((res) => {
-        const suggestionList = [];
-        for (let item of res.data.data) {
-          let autosuggestObj = {
-            id: item.id,
-            iataCode: item.iataCode,
-            subType: item.subType,
-            iataCodeCityName: `${item.iataCode} ${prettyWord(
-              item.address.cityName
-            )}`,
-            city: `${prettyWord(item.address.cityName)}`,
-            cityIata: `${prettyWord(item.address.cityName)} (${item.iataCode})`,
-            details: `${item.iataCode} ${prettyWord(item.name)}`,
-            countryName: `${prettyWord(item.address.countryName)}`,
-          };
-          suggestionList.push(autosuggestObj);
-        }
-        setToArray(suggestionList);
-        if (isloading === true) {
-          source.cancel("operation cancelled");
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        if (Axios.isCancel(err)) console.log("request cancelled:", err.message);
-        console.log("autosuggest fetch error", err);
-        if (isloading === true) {
-          source.cancel("operation cancelled");
-        }
-        setIsLoading(false);
-      });
   };
 
   const handlesuggestionclick = (e, suggestion) => {
@@ -132,14 +207,14 @@ const ToSearch = () => {
     if (suggestion.subType === "CITY") {
       setToLocal(suggestion.city);
       setTo(suggestion.iataCode);
-      setToCity(suggestion.city)
+      setToCity(suggestion.city);
       if (tripType === "Multi-city") {
         setNextFrom(suggestion.iataCode);
         setNextFromLocal(suggestion.city);
       }
     } else {
       setTo(suggestion.iataCode);
-      setToCity(suggestion.city)
+      setToCity(suggestion.city);
       setToLocal(suggestion.cityIata);
       if (tripType === "Multi-city") {
         setNextFrom(suggestion.iataCode);
@@ -159,7 +234,7 @@ const ToSearch = () => {
   };
 
   const handleToClickAway = () => {
-    if (!toArray) {
+    if (!data) {
       setTo("");
       setToLocal("");
       if (tripType === "Multi-city") {
@@ -169,27 +244,27 @@ const ToSearch = () => {
       setOpenSuggestionsPaper(false);
       return;
     }
-    if (toArray[0]) {
-      if (toArray[0].subType === "CITY") {
-        setTo(toArray[0].iataCode);
-        setToCity(toArray[0].city)
-        setToLocal(toArray[0].city);
+    if (data[0]) {
+      if (data[0].subType === "CITY") {
+        setTo(data[0].iataCode);
+        setToCity(data[0].city);
+        setToLocal(data[0].city);
         if (tripType === "Multi-city") {
-          setNextFrom(toArray[0].iataCode);
-          setNextFromLocal(toArray[0].city);
+          setNextFrom(data[0].iataCode);
+          setNextFromLocal(data[0].city);
         }
       } else {
-        setTo(toArray[0].iataCode);
-        setToCity(toArray[0].city)
-        setToLocal(toArray[0].cityIata);
+        setTo(data[0].iataCode);
+        setToCity(data[0].city);
+        setToLocal(data[0].cityIata);
         if (tripType === "Multi-city") {
-          setNextFrom(toArray[0].iataCode);
-          setNextFromLocal(toArray[0].cityIata);
+          setNextFrom(data[0].iataCode);
+          setNextFromLocal(data[0].cityIata);
         }
       }
       setOpenSuggestionsPaper(false);
     } else {
-      if (to && !toArray.includes(to)) {
+      if (to && !data.includes(to)) {
         setOpen(true);
         setTo("");
         setToLocal("");
@@ -228,10 +303,10 @@ const ToSearch = () => {
           {openSuggestionsPaper ? (
             <ClickAwayListener onClickAway={handleToClickAway}>
               <Paper className={classes.paper} elevation={3}>
-                {isloading ? <LinearProgress /> : ""}
+                {isValidating ? <LinearProgress /> : ""}
                 <List component="nav" aria-label="main mailbox folders">
-                  {toArray
-                    ? toArray.map((suggestion) => (
+                  {data
+                    ? data.map((suggestion) => (
                         <React.Fragment key={suggestion.id}>
                           <ListItem button>
                             <ListItemIcon>

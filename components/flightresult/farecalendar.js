@@ -39,10 +39,12 @@ const styles = makeStyles((theme) => ({
 
 export default function FareCalendar({ prevState, lastSearch }) {
   const classes = styles();
-  const departureMatrix = getPlusMinus3DaysArray(prevState.departureDate);
+  const departureDate = new Date(prevState.departureDate);
+  const returnDate = new Date(prevState.returnDate);
+  const departureMatrix = getPlusMinus3DaysArray(departureDate);
   const returnDateMatrix = getReturnDateAndData(
-    prevState.departureDate,
-    prevState.returnDate,
+    departureDate,
+    returnDate,
     prevState.tripType
   );
   const [count, setCount] = useState(1);

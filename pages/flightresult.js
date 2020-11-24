@@ -71,44 +71,14 @@ const styles = makeStyles((theme) => ({
 }));
 
 const FlightResult = () => {
-  const [flightOffers, setFlightOffers] = useRecoilState(flightOffers_);
-  const [prevState, setPrevState] = useRecoilState(prevState_);
-  const [lastSearch, setLastSearch] = useRecoilState(lastSearch_);
-
   const classes = styles();
-  const [isDrawerOpen, toggleDrawerState] = useRecoilState(isDrawerOpen_);
-  const isDesktop = useMediaQuery("(min-width: 960px)");
-  const [stateFlightOffer, setStateFlightOffer] = useRecoilState(flightOffer_);
-  const toggleDrawer = (flightOffer) => {
-    // console.log("clicked drawer", flightOffer);
-    setStateFlightOffer(flightOffer);
-    toggleDrawerState((prev) => !prev);
-  };
+  const [local, setLocal] = useState(null);
 
-  const { data, error, set, update } = useDocument("flightData/stateData", {
-    onSuccess: (data) => {
-      console.log("data from store:", data);
-    },
-    parseDates: [
-      "prevState.departureDate",
-      "prevState.departureDate1",
-      "prevState.departureDate2",
-      "prevState.departureDate3",
-      "prevState.departureDate4",
-      "prevState.returnDate",
-    ],
-    focusThrottleInterval: 86400000,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    refreshInterval: 86400000,
-    dedupingInterval: 86400000,
-    errorRetryCount: 12,
-    onLoadingSlow: () => {
-      console.log("slow network detected");
-    },
-  });
-
-  console.log("data", data, error);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLocal(JSON.parse(window.localStorage.getItem("local")));
+    }
+  }, [null]);
 
   return (
     <Container disableGutters maxWidth="xl" className={classes.container}>
@@ -117,13 +87,13 @@ const FlightResult = () => {
           <BaseHeader title="airXplora : Your Travel Tech Companion" />
         </Grid>
         <Grid item xs={12}>
-          {data ? (
-            <AboutFlight prevState={data.prevState} />
+          {local ? (
+            <AboutFlight prevState={local.prevState} />
           ) : (
             <Skeleton variant="rect" height={118} />
           )}
         </Grid>
-        {data ? <FlightOffersList storeData={data} /> : ""}
+        {local ? <FlightOffersList storeData={local} /> : ""}
         <Grid item xs={12}>
           <ClassicFooter />
         </Grid>
