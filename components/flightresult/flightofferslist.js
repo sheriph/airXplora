@@ -30,6 +30,7 @@ import {
 } from "../../recoil/state";
 import { useRecoilState, useRecoilValue } from "recoil";
 import Filter from "../filter/filter";
+const qs = require("qs");
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -64,29 +65,70 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-const fetcher = async (...arg) => {
-  // console.log("url, lastSearch", arg);
-  const data = await Axios({
-    data: JSON.parse(arg[1]),
-    method: "post",
-    url: "/api/flightofferpost",
-  })
-    .then((res) => {
-      // console.log("response", res);
-
-      if (res.type === "error") throw new Error(res.error);
-      return res.data;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  return data;
-};
-
 const FlightOffersList = ({ storeData }) => {
   const [rd, setRenderedData] = useRecoilState(flightOffers_);
   const isLoading = useRecoilValue(isLoading_);
   const uidata = useRecoilValue(flightOffers_);
+
+  const axiosToken = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  const axiosFlightOffers = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v2/shopping/flight-offers",
+  });
+
+  axiosFlightOffers.interceptors.request.use(
+    (req) => {
+      req.headers = {
+        Authorization: `Bearer ${window.sessionStorage.getItem("accessToken")}`,
+        "Content-Type": "application/json",
+      };
+      return req;
+    },
+    (error) => {
+      Promise.reject(error);
+    }
+  );
+
+  axiosFlightOffers.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+      if (
+        error.response &&
+        error.response.config &&
+        error.response.status === 401
+      ) {
+        await axiosToken
+          .request({
+            data: qs.stringify({
+              client_id: " kYUgZVtfSuy1NmE3kzGwtubzWGteoK1z",
+              client_secret: "KDvXBul4gw1pL6rg",
+              grant_type: "client_credentials",
+            }),
+          })
+          .then((res) => {
+            console.log("token at response interceptor", res.data.access_token);
+            window.sessionStorage.setItem("accessToken", res.data.access_token);
+          })
+          .catch((err) => console.log(err.response));
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  const fetcher = async (...arg) => {
+    const res = await axiosFlightOffers.request({ data: arg[1] });
+    if (res.status !== 200) {
+      throw new Error("response status not correct");
+    }
+    return res.data.data;
+  };
 
   const { data, error, isValidating, mutate } = useSWR(
     ["/api/flightofferpost", JSON.stringify(storeData.lastSearch)],
@@ -96,14 +138,18 @@ const FlightOffersList = ({ storeData }) => {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       refreshInterval: 86400000,
-      dedupingInterval: 86400000,
+      // dedupingInterval: 86400000,
       errorRetryInterval: 1000,
-      errorRetryCount: 12,
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
       onLoadingSlow: () => {
         console.log("slow network detected");
       },
+      onError: (error) => {
+        console.log("on eror", error);
+      },
       onSuccess: (data) => {
-        console.log("on success flightoffers data", data);
+        console.log("on success data", data);
         setRenderedData(data);
       },
       //  initialData: defaultData,

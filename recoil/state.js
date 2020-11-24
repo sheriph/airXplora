@@ -310,14 +310,48 @@ export const isLoading_ = atom({
   default: false,
 });
 
+export const accessToken_ = atom({
+  key: "accesstoken",
+  default: "FI5D3W9oHr5Aa79G3VN09oijAeuy",
+});
 
 //test data //
 
-/* export const flightOffers_ = atom({
-  key: "data",
-  default: [{"type":"flight-offer","id":"1","source":"GDS","instantTicketingRequired":false,"nonHomogeneous":false,"oneWay":false,"lastTicketingDate":"2020-10-25","numberOfBookableSeats":9,"itineraries":[{"duration":"PT2H25M","segments":[{"departure":{"iataCode":"LGW","terminal":"S","at":"2020-10-30T09:55:00"},"arrival":{"iataCode":"MAD","terminal":"1","at":"2020-10-30T13:20:00"},"carrierCode":"UX","number":"1014","aircraft":{"code":"73H"},"operating":{"carrierCode":"UX"},"duration":"PT2H25M","id":"3","numberOfStops":0,"blacklistedInEU":false}]},{"duration":"PT2H25M","segments":[{"departure":{"iataCode":"MAD","terminal":"1","at":"2020-11-18T07:30:00"},"arrival":{"iataCode":"LGW","terminal":"S","at":"2020-11-18T08:55:00"},"carrierCode":"UX","number":"1013","aircraft":{"code":"73H"},"operating":{"carrierCode":"UX"},"duration":"PT2H25M","id":"9","numberOfStops":0,"blacklistedInEU":false}]}],"price":{"currency":"NGN","total":"37665.00","base":"15002.00","fees":[{"amount":"0.00","type":"SUPPLIER"},{"amount":"0.00","type":"TICKETING"}],"grandTotal":"37665.00","additionalServices":[{"amount":"27148","type":"CHECKED_BAGS"}]},"pricingOptions":{"fareType":["PUBLISHED"],"includedCheckedBagsOnly":false},"validatingAirlineCodes":["UX"],"travelerPricings":[{"travelerId":"1","fareOption":"STANDARD","travelerType":"ADULT","price":{"currency":"NGN","total":"37665.00","base":"15002.00"},"fareDetailsBySegment":[{"segmentId":"3","cabin":"ECONOMY","fareBasis":"NYYR5L","brandedFare":"LITE","class":"N","includedCheckedBags":{"quantity":0}},{"segmentId":"9","cabin":"ECONOMY","fareBasis":"ZYYR0L","brandedFare":"LITE","class":"Z","includedCheckedBags":{"quantity":0}}]}]},{"type":"flight-offer","id":"2","source":"GDS","instantTicketingRequired":false,"nonHomogeneous":false,"oneWay":false,"lastTicketingDate":"2020-10-25","numberOfBookableSeats":9,"itineraries":[{"duration":"PT2H25M","segments":[{"departure":{"iataCode":"LGW","terminal":"S","at":"2020-10-30T09:55:00"},"arrival":{"iataCode":"MAD","terminal":"1","at":"2020-10-30T13:20:00"},"carrierCode":"UX","number":"1014","aircraft":{"code":"73H"},"operating":{"carrierCode":"UX"},"duration":"PT2H25M","id":"3","numberOfStops":0,"blacklistedInEU":false}]},{"duration":"PT2H25M","segments":[{"departure":{"iataCode":"MAD","terminal":"1","at":"2020-11-18T14:55:00"},"arrival":{"iataCode":"LGW","terminal":"S","at":"2020-11-18T16:20:00"},"carrierCode":"UX","number":"1015","aircraft":{"code":"73H"},"operating":{"carrierCode":"UX"},"duration":"PT2H25M","id":"10","numberOfStops":0,"blacklistedInEU":false}]}],"price":{"currency":"NGN","total":"37665.00","base":"15002.00","fees":[{"amount":"0.00","type":"SUPPLIER"},{"amount":"0.00","type":"TICKETING"}],"grandTotal":"37665.00","additionalServices":[{"amount":"27148","type":"CHECKED_BAGS"}]},"pricingOptions":{"fareType":["PUBLISHED"],"includedCheckedBagsOnly":false},"validatingAirlineCodes":["UX"],"travelerPricings":[{"travelerId":"1","fareOption":"STANDARD","travelerType":"ADULT","price":{"currency":"NGN","total":"37665.00","base":"15002.00"},"fareDetailsBySegment":[{"segmentId":"3","cabin":"ECONOMY","fareBasis":"NYYR5L","brandedFare":"LITE","class":"N","includedCheckedBags":{"quantity":0}},{"segmentId":"10","cabin":"ECONOMY","fareBasis":"ZYYR0L","brandedFare":"LITE","class":"Z","includedCheckedBags":{"quantity":0}}]}]},{"type":"flight-offer","id":"3","source":"GDS","instantTicketingRequired":false,"nonHomogeneous":false,"oneWay":false,"lastTicketingDate":"2020-10-25","numberOfBookableSeats":5,"itineraries":[{"duration":"PT2H20M","segments":[{"departure":{"iataCode":"LGW","terminal":"S","at":"2020-10-30T10:50:00"},"arrival":{"iataCode":"MAD","terminal":"4","at":"2020-10-30T14:10:00"},"carrierCode":"IB","number":"3715","aircraft":{"code":"32A"},"operating":{"carrierCode":"I2"},"duration":"PT2H20M","id":"1","numberOfStops":0,"blacklistedInEU":false}]},{"duration":"PT2H15M","segments":[{"departure":{"iataCode":"MAD","terminal":"4","at":"2020-11-18T18:25:00"},"arrival":{"iataCode":"LGW","terminal":"S","at":"2020-11-18T19:40:00"},"carrierCode":"IB","number":"3718","aircraft":{"code":"32A"},"operating":{"carrierCode":"I2"},"duration":"PT2H15M","id":"5","numberOfStops":0,"blacklistedInEU":false}]}],"price":{"currency":"NGN","total":"42165.00","base":"19502.00","fees":[{"amount":"0.00","type":"SUPPLIER"},{"amount":"0.00","type":"TICKETING"}],"grandTotal":"42165.00","additionalServices":[{"amount":"18100","type":"CHECKED_BAGS"}]},"pricingOptions":{"fareType":["PUBLISHED"],"includedCheckedBagsOnly":false},"validatingAirlineCodes":["IB"],"travelerPricings":[{"travelerId":"1","fareOption":"STANDARD","travelerType":"ADULT","price":{"currency":"NGN","total":"42165.00","base":"19502.00"},"fareDetailsBySegment":[{"segmentId":"1","cabin":"ECONOMY","fareBasis":"ADNNENB2","brandedFare":"NOBAG","class":"A","includedCheckedBags":{"quantity":0}},{"segmentId":"5","cabin":"ECONOMY","fareBasis":"ADNNENB2","brandedFare":"NOBAG","class":"A","includedCheckedBags":{"quantity":0}}]}]}]
-,
-}); */
+export const postdatasample_ = atom({
+  key: "postdatasample",
+  default: {
+    sources: ["GDS"],
+    originDestinations: [
+      {
+        departureDateTimeRange: { date: "2020-11-25" },
+        originLocationCode: "LON",
+        destinationLocationCode: "MAD",
+        id: "1",
+      },
+      {
+        departureDateTimeRange: { date: "2020-11-30" },
+        destinationLocationCode: "LON",
+        id: "2",
+        originLocationCode: "MAD",
+      },
+    ],
+    searchCriteria: {
+      maxFlightOffers: 1,
+      flightFilters: {
+        cabinRestrictions: [
+          {
+            originDestinationIds: ["1"],
+            cabin: "ECONOMY",
+            coverage: "MOST_SEGMENTS",
+          },
+        ],
+        carrierRestrictions: { excludedCarrierCodes: ["OZ"] },
+      },
+    },
+    travelers: [{ id: "1", travelerType: "ADULT" }],
+    currencyCode: "NGN",
+  },
+});
 
 /* export const data2_ = atom({
   key: "data2",

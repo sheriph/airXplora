@@ -3,13 +3,14 @@ import PropTypes from "prop-types";
 import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import theme from "../src/theme";
-import { RecoilRoot } from "recoil";
+import { RecoilRoot, useRecoilState } from "recoil";
 import "firebase/firestore";
 import "firebase/auth";
 import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
 import { SnackbarProvider } from "notistack";
 import Axios from "axios";
 import Head from "next/head";
+import { accessToken_ } from "../recoil/state";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -26,11 +27,17 @@ const fuego = new Fuego(firebaseConfig);
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
-  Axios.defaults.baseURL =
+
+  // const [accessToken, setAccessToken] = useRecoilState(accessToken_);
+/*   Axios.defaults.headers.[
+    "Authorization"
+  ] = `Bearer "Vtt7njCvXX6jeWtus0m2iU2jtOtQ"`;
+ */
+  /*  Axios.defaults.baseURL =
     process.env.NODE_ENV === "production"
       ? "https://airxplora.vercel.app/"
       : "http://localhost:3000";
-
+ */
   // Axios.defaults.baseURL = "http://localhost:3000";
 
   React.useEffect(() => {

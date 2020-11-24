@@ -27,6 +27,11 @@ import { useRecoilState } from "recoil";
 import { from1_, fromLocal1_ } from "../../recoil/state";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import Skeleton from "@material-ui/lab/Skeleton";
+import useSWR from "swr";
+const qs = require("qs");
+
+
+
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -53,8 +58,6 @@ const FromSearch1 = () => {
   const classes = style();
   const [from, setFrom] = useRecoilState(from1_);
 
-
-  
   const [fromLocal, setFromLocal] = useRecoilState(fromLocal1_);
   const [fromArray, setFromArray] = useState(null);
   const [open, setOpen] = React.useState(false);
@@ -62,58 +65,117 @@ const FromSearch1 = () => {
   const [isloading, setIsLoading] = useState(false);
   const source = Axios.CancelToken.source();
 
+  const axiosToken = Axios.create({
+    method: "post",
+    baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  const axiosAirportNames = Axios.create({
+    method: "get",
+    baseURL: "https://test.api.amadeus.com/v1/reference-data",
+  });
+
+  axiosAirportNames.interceptors.request.use(
+    (req) => {
+      //  console.log("req at req interceptor", req);
+      if (!fromLocal) {
+        throw new Error(fromLocal);
+      }
+      req.headers = {
+        Authorization: `Bearer ${window.sessionStorage.getItem("accessToken")}`,
+      };
+      return req;
+    },
+    (error) => {
+      //   console.log("rejecting request b4 its sent");
+      Promise.reject(error);
+    }
+  );
+
+  axiosAirportNames.interceptors.response.use(
+    (res) => {
+      if (res.status !== 200 || !res.data || !res.data.data) {
+        throw new Error("error response in interceptor", res.statusText);
+      }
+      const suggestionList = [];
+      for (let item of res.data.data) {
+        let autosuggestObj = {
+          id: item.id,
+          iataCode: item.iataCode,
+          subType: item.subType,
+          iataCodeCityName: `${item.iataCode} ${prettyWord(
+            item.address.cityName
+          )}`,
+          city: `${prettyWord(item.address.cityName)}`,
+          cityIata: `${prettyWord(item.address.cityName)} (${item.iataCode})`,
+          details: `${item.iataCode} ${prettyWord(item.name)}`,
+          countryName: `${prettyWord(item.address.countryName)}`,
+        };
+        suggestionList.push(autosuggestObj);
+      }
+      return suggestionList;
+    },
+    async (error) => {
+      if (
+        error.response &&
+        error.response.config &&
+        error.response.status === 401
+      ) {
+        await axiosToken
+          .request({
+            data: qs.stringify({
+              client_id: " kYUgZVtfSuy1NmE3kzGwtubzWGteoK1z",
+              client_secret: "KDvXBul4gw1pL6rg",
+              grant_type: "client_credentials",
+            }),
+          })
+          .then((res) => {
+            console.log("token at response interceptor", res.data.access_token);
+            window.sessionStorage.setItem("accessToken", res.data.access_token);
+          })
+          .catch((err) => console.log(err.response));
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  const fetcher = async (fromLocal) => {
+    const res = await axiosAirportNames.request({
+      url: `/locations?subType=CITY,AIRPORT&keyword=${fromLocal}`,
+    });
+    //  console.log("res in fetcher", res);
+    return res;
+  };
+
+  const { data, error, isValidating, mutate } = useSWR(fromLocal, fetcher, {
+    focusThrottleInterval: 86400000,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    refreshInterval: 86400000,
+    shouldRetryOnError: true,
+    errorRetryCount: 5,
+    errorRetryInterval: 3000,
+    onLoadingSlow: () => {
+      //  console.log("slow network detected");
+    },
+    onError: (error) => {
+      //   console.log("error from fetcher", error);
+    },
+    onSuccess: (data) => {
+      //   console.log("success data", data);
+      //   setFromArray(data);
+    },
+  });
+
   const handleFromChange = (e) => {
     setFromLocal(e.target.value);
     setOpenSuggestionsPaper(true);
-    if (!fromLocal /* || from.length > 6 */) {
-      return;
+    if (isValidating === false) {
+      if (data === undefined && e.target.value) mutate();
     }
-
-    if (isloading === true) {
-      source.cancel("operation cancelled and starting a new search");
-    }
-
-    setIsLoading(true);
-    Axios({
-      method: "post",
-      url: "/api/airportautosuggest",
-      cancelToken: source.token,
-      data: {
-        keyword: fromLocal,
-        subType: "AIRPORT,CITY",
-      },
-    })
-      .then((res) => {
-        const suggestionList = [];
-        for (let item of res.data.data) {
-          let autosuggestObj = {
-            id: item.id,
-            iataCode: item.iataCode,
-            subType: item.subType,
-            iataCodeCityName: `${item.iataCode} ${prettyWord(
-              item.address.cityName
-            )}`,
-            city: `${prettyWord(item.address.cityName)}`,
-            cityIata: `${prettyWord(item.address.cityName)} (${item.iataCode})`,
-            details: `${item.iataCode} ${prettyWord(item.name)}`,
-            countryName: `${prettyWord(item.address.countryName)}`,
-          };
-          suggestionList.push(autosuggestObj);
-        }
-        setFromArray(suggestionList);
-        if (isloading === true) {
-          source.cancel("operation cancelled and starting a new search");
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        if (Axios.isCancel(err)) console.log("request cancelled:", err.message);
-        console.log("autosuggest fetch error", err);
-        if (isloading === true) {
-          source.cancel("operation cancelled and starting a new search");
-        }
-        setIsLoading(false);
-      });
   };
 
   const handlesuggestionclick = (e, suggestion) => {
@@ -140,23 +202,23 @@ const FromSearch1 = () => {
   };
 
   const handleFromClickAway = () => {
-    if (!fromArray) {
+    if (!data) {
       setFrom("");
       setFromLocal("");
       setOpenSuggestionsPaper(false);
       return;
     }
-    if (fromArray[0]) {
-      if (fromArray[0].subType === "CITY") {
-        setFromLocal(fromArray[0].city);
-        setFrom(fromArray[0].iataCode);
+    if (data[0]) {
+      if (data[0].subType === "CITY") {
+        setFromLocal(data[0].city);
+        setFrom(data[0].iataCode);
       } else {
-        setFromLocal(fromArray[0].cityIata);
-        setFrom(fromArray[0].iataCode);
+        setFromLocal(data[0].cityIata);
+        setFrom(data[0].iataCode);
       }
       setOpenSuggestionsPaper(false);
     } else {
-      if (fromLocal && !fromArray.includes(fromLocal)) {
+      if (fromLocal && !data.includes(fromLocal)) {
         setOpen(true);
         setFromLocal("");
         setFrom("");
@@ -217,10 +279,10 @@ const FromSearch1 = () => {
         {openSuggestionsPaper ? (
           <ClickAwayListener onClickAway={handleFromClickAway}>
             <Paper className={classes.paper} elevation={6}>
-              {isloading ? <LinearProgress /> : ""}
+              {isValidating ? <LinearProgress /> : ""}
               <List component="nav" aria-label="main mailbox folders">
-                {fromArray
-                  ? fromArray.map((suggestion) => (
+                {data
+                  ? data.map((suggestion) => (
                       <React.Fragment key={suggestion.id}>
                         <ListItem button>
                           <ListItemIcon>

@@ -358,34 +358,16 @@ const SearchButton = () => {
 
     console.log("congrats, u made it here: see data", data);
 
-    /* setPrevState(state);
-    setLastSearch(data); */
-    set({ lastSearch: data, prevState: state })
-      .then((res) => {
-        console.log("is-success");
-        router.push("/flightresult").then(() => {
-          router.reload();
-        });
-      })
-      .catch((err) => console.log(err));
-    //  setLoading(true);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "local",
+        JSON.stringify({ lastSearch: data, prevState: state })
+      );
 
-    /*   Axios({
-      data: data,
-      method: "post",
-      url: "/api/flightofferpost",
-    })
-      .then((res) => {
-        console.log("response", res.data);
-        setFlightOffers(res.data);
-        setLoading("confirmed");
-        setTimeout(() => {
-          router.push("/flightresult");
-        }, 1000);
-        //Router.push("/flightresult");
-        return;
-      })
-      .catch((err) => console.log(err)); */
+      router.push("/flightresult").then(() => {
+        router.reload();
+      });
+    }
   };
   return (
     <React.Fragment>
