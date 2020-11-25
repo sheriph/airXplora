@@ -30,6 +30,8 @@ import {
 } from "../../recoil/state";
 import { useRecoilState, useRecoilValue } from "recoil";
 import Filter from "../filter/filter";
+import { useRouter } from "next/router";
+import { useSnackbar } from "notistack";
 const qs = require("qs");
 
 const styles = makeStyles((theme) => ({
@@ -69,6 +71,18 @@ const FlightOffersList = ({ storeData }) => {
   const [rd, setRenderedData] = useRecoilState(flightOffers_);
   const isLoading = useRecoilValue(isLoading_);
   const uidata = useRecoilValue(flightOffers_);
+  const router = useRouter();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  const alertPop = (message, type) => {
+    enqueueSnackbar(message, {
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      variant: type,
+    });
+  };
 
   const axiosToken = Axios.create({
     method: "post",
@@ -118,6 +132,15 @@ const FlightOffersList = ({ storeData }) => {
           })
           .catch((err) => console.log(err.response));
       }
+      if (error.response.status === 400) {
+        alertPop(
+          "Stored date is in the past, please make a new search, redirecting to the homepage",
+          "warning"
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 5000);
+      }
       return Promise.reject(error);
     }
   );
@@ -143,13 +166,14 @@ const FlightOffersList = ({ storeData }) => {
       shouldRetryOnError: true,
       errorRetryCount: 3,
       onLoadingSlow: () => {
-        console.log("slow network detected");
+        alertPop("slow network detected", "warning");
       },
       onError: (error) => {
         console.log("on eror", error);
+        alertPop("error getting flight options, trying again ....", "warning");
       },
       onSuccess: (data) => {
-        console.log("on success data", data);
+        alertPop("flight options received", "success");
         setRenderedData(data);
       },
       //  initialData: defaultData,

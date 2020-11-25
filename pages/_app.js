@@ -11,6 +11,7 @@ import { SnackbarProvider } from "notistack";
 import Axios from "axios";
 import Head from "next/head";
 import { accessToken_ } from "../recoil/state";
+import { Flipper, Flipped } from "react-flip-toolkit";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -26,19 +27,7 @@ const firebaseConfig = {
 const fuego = new Fuego(firebaseConfig);
 
 export default function MyApp(props) {
-  const { Component, pageProps } = props;
-
-  // const [accessToken, setAccessToken] = useRecoilState(accessToken_);
-/*   Axios.defaults.headers.[
-    "Authorization"
-  ] = `Bearer "Vtt7njCvXX6jeWtus0m2iU2jtOtQ"`;
- */
-  /*  Axios.defaults.baseURL =
-    process.env.NODE_ENV === "production"
-      ? "https://airxplora.vercel.app/"
-      : "http://localhost:3000";
- */
-  // Axios.defaults.baseURL = "http://localhost:3000";
+  const { Component, pageProps, router } = props;
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -58,7 +47,13 @@ export default function MyApp(props) {
           <CssBaseline />
           <FuegoProvider fuego={fuego}>
             <RecoilRoot>
-              <Component {...pageProps} />
+              <Flipper flipKey={router.asPath}>
+                <Flipped flipId="page">
+                  <div>
+                    <Component {...pageProps} />
+                  </div>
+                </Flipped>
+              </Flipper>
             </RecoilRoot>
           </FuegoProvider>
         </SnackbarProvider>

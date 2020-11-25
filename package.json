@@ -24,6 +24,7 @@
     "date-fns": "^2.16.1",
     "express": "^4.17.1",
     "firebase": "^7.20.0",
+    "js-cookie": "^2.2.1",
     "material-table": "^1.69.1",
     "material-ui-popup-state": "^1.6.1",
     "next": "^10.0.1",
@@ -33,6 +34,7 @@
     "npm-install-peers": "^1.2.1",
     "prop-types": "latest",
     "react-color": "^2.19.3",
+    "react-flip-toolkit": "^7.0.13",
     "react-lazyload": "^3.1.0",
     "recoil": "0.0.10",
     "swr": "^0.3.2"

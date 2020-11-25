@@ -363,10 +363,7 @@ const SearchButton = () => {
         "local",
         JSON.stringify({ lastSearch: data, prevState: state })
       );
-
-      router.push("/flightresult").then(() => {
-        router.reload();
-      });
+      router.push("/flightresult");
     }
   };
   return (

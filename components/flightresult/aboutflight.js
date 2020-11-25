@@ -40,7 +40,7 @@ const styles = makeStyles((theme) => ({
     bottom: "5px",
   },
 }));
-const AboutFlight = ({prevState}) => {
+const AboutFlight = ({ prevState }) => {
   const classes = styles();
 
   const [openCollapse, toggleOpenCollapse] = useState(false);
@@ -49,15 +49,15 @@ const AboutFlight = ({prevState}) => {
     toggleOpenCollapse((prev) => !prev);
   };
 
- // const prevState = useRecoilValue(prevState_);
+  // const prevState = useRecoilValue(prevState_);
 
   if (!prevState) return <> loading .. </>;
   return (
     <Container disableGutters>
       <Container className={classes.container}>
         <Grid container justify="space-evenly" alignItems="center" spacing={1}>
-          <Grid item>
-            <Grid container direction="column">
+          <Grid item xs = {12}>
+            <Grid container justify = "center" spacing = {3}>
               <Grid item>
                 {prevState.tripType === "Round trip"
                   ? "Your Round Trip"

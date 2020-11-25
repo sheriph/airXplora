@@ -47,6 +47,7 @@ export default function FareCalendar({ prevState, lastSearch }) {
     returnDate,
     prevState.tripType
   );
+
   const [count, setCount] = useState(1);
   const [fullMatrix, setFullMatrix] = useState([]);
 
@@ -60,7 +61,6 @@ export default function FareCalendar({ prevState, lastSearch }) {
         url: "/api/matrixflightoffer",
       })
         .then(async (res) => {
-          console.log("response", res.data);
           setFullMatrix(res.data);
         })
         .catch((err) => console.log(err));
@@ -127,11 +127,12 @@ export default function FareCalendar({ prevState, lastSearch }) {
                       overflow
                     >
                       <GetFlightOffer
-                        departureDate={data.departure}
+                        uniqueKey={index}
+                        departureDate={data.departure || data.currentDate}
                         returnDate={
                           prevState.tripType === "Round trip"
                             ? data.return
-                            : undefined
+                            : null
                         }
                         lastSearch={data.lastSearch}
                       />

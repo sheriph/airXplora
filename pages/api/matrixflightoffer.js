@@ -35,7 +35,7 @@ export default async function (req, res) {
           originDestinations: [
             {
               ...lastSearch.originDestinations[0],
-              departureDateTimeRange: { date: data[i].departure },
+              departureDateTimeRange: { date: data[i].currentDate },
             },
           ],
           searchCriteria: { ...lastSearch.searchCriteria, maxFlightOffers: 1 },
