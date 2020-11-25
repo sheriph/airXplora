@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import useSWR from "swr";
 import Skeleton from "@material-ui/lab/Skeleton";
@@ -23,6 +23,7 @@ import { ClickAwayListener } from "@material-ui/core";
 import ResultCard from "./classsicresultcard";
 import CancelIcon from "@material-ui/icons/Cancel";
 import FlightSumarry from "./flightsummary";
+import { useRouter } from "next/router";
 const qs = require("qs");
 
 const styles = makeStyles((theme) => ({
@@ -85,6 +86,13 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   const matrixPriceSub = useRecoilValue(matrixPrice_);
   const [lv, setLowestValue] = useRecoilState(lowestValue_);
   const lowestValue = useRecoilValue(lowestValue_);
+  const key1 = JSON.stringify(departureDate);
+  const key2 = JSON.stringify(returnDate);
+  const key3 = JSON.stringify(lastSearch);
+
+  const router = useRouter();
+
+  useEffect(() => {}, []);
 
   const axiosToken = Axios.create({
     method: "post",
@@ -139,7 +147,7 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
   );
 
   const fetcher = async (...arg) => {
-    const res = await axiosFlightOffer.request({ data: arg[3] });
+    const res = await axiosFlightOffer.request({ data: key3 });
     if (
       res.status !== 200 ||
       !res.data ||
@@ -151,40 +159,30 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
     return res.data.data[0];
   };
 
-  const { data, error, isValidating } = useSWR(
-    [
-      "/api/flightofferpost",
-      departureDate,
-      returnDate,
-      JSON.stringify(lastSearch),
-    ],
-    fetcher,
-    {
-      focusThrottleInterval: 86400000,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      refreshInterval: 86400000,
-      // dedupingInterval: 86400000,
-      errorRetryInterval: 7000,
-      shouldRetryOnError: true,
-      errorRetryCount: 5,
-      onLoadingSlow: () => {
-      },
-      onError: (error) => {
-      },
-      onSuccess: (data) => {
-        if (typeof data.price.total !== "string") {
-          throw new Error("cant find price");
-        }
-        let set = new Set(matrixPriceSub);
-        set.add(data.price.total);
-        setMatrixPrice(Array.from(set));
-        setLowestValue(Math.min(...matrixPriceSub));
-      },
-      //  initialData: defaultData,
-    }
-  );
+  // console.log("get fligth offers key", key1, key2);
 
+  const { data, error, isValidating } = useSWR([key1, key2], fetcher, {
+    focusThrottleInterval: 86400000,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    refreshInterval: 86400000,
+    // dedupingInterval: 86400000,
+    errorRetryInterval: 10000,
+    shouldRetryOnError: true,
+    errorRetryCount: 5,
+    onLoadingSlow: () => {},
+    onError: (error) => {},
+    onSuccess: (data) => {
+      if (typeof data.price.total !== "string") {
+        throw new Error("cant find price");
+      }
+      let set = new Set(matrixPriceSub);
+      set.add(data.price.total);
+      setMatrixPrice(Array.from(set));
+      setLowestValue(Math.min(...matrixPriceSub));
+    },
+    //  initialData: defaultData,
+  });
   // console.log("data, error", data, error);
 
   // return "25,000";
@@ -217,7 +215,39 @@ const GetFlightOffer = ({ departureDate, returnDate, lastSearch }) => {
                 className={classes.cancelicon}
               />
             </Grid>
-            <Grid item xs={12} onClick={() => toggleDrawer((prev) => !prev)}>
+            <Grid
+              item
+              xs={12}
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  console.log("dates", departureDate, returnDate);
+                  let local = JSON.parse(window.localStorage.getItem("local"));
+                  let updatedLocal = {
+                    prevState: {
+                      ...local.prevState,
+                      departureDate: new Date(departureDate).toJSON(),
+                      returnDate:
+                        returnDate === null
+                          ? null
+                          : new Date(returnDate).toJSON(),
+                    },
+                    lastSearch: {
+                      ...lastSearch,
+                      searchCriteria: {
+                        ...lastSearch.searchCriteria,
+                        maxFlightOffers: 250,
+                      },
+                    },
+                  };
+                //  console.log("updatedLocal", updatedLocal);
+                  window.localStorage.setItem(
+                    "local",
+                    JSON.stringify(updatedLocal)
+                  );
+                  router.reload();
+                }
+              }}
+            >
               <ResultCard flightOffer={data} />
             </Grid>
           </Grid>

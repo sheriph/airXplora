@@ -34,6 +34,7 @@ import InboundFlight from "./inbound";
 import CloseIcon from "@material-ui/icons/Close";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { isDrawerOpen_, prevState_ } from "../../recoil/state";
+import { formatPrice } from "../general/utilities";
 
 const styles = makeStyles((theme) => ({
   paper: {
@@ -100,11 +101,16 @@ const FlightSumarry = ({ flightOffer, prevState }) => {
   return (
     <React.Fragment>
       <Container disableGutters className={classes.container}>
-        <Grid container justify="space-between">
+        <Grid container justify="space-between" alignItems="center">
           <Grid item>
             <Button variant="contained" color="primary" fullWidth>
               Book Now
             </Button>
+          </Grid>
+          <Grid item>
+            <Typography color="primary">
+              &#8358;{formatPrice(flightOffer.price.total)}
+            </Typography>
           </Grid>
           <Grid item>
             <Button
