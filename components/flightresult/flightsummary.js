@@ -96,7 +96,6 @@ const FlightSumarry = ({ flightOffer, prevState }) => {
   const classes = styles();
   const [isDrawerOpen, toggleDrawerState] = useRecoilState(isDrawerOpen_);
   // const prevState = useRecoilValue(prevState_);
-
   if (!flightOffer || !prevState) return <>Loading ...</>;
   return (
     <React.Fragment>
@@ -118,7 +117,10 @@ const FlightSumarry = ({ flightOffer, prevState }) => {
               color="primary"
               fullWidth
               startIcon={<CloseIcon />}
-              onClick={() => toggleDrawerState((prev) => !prev)}
+              onClick={() => {
+                console.log("close drawer");
+                toggleDrawerState(false);
+              }}
             >
               Close
             </Button>

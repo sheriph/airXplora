@@ -2,7 +2,7 @@ import "date-fns";
 import React, { useState, useEffect } from "react";
 import DateFnsUtils from "@date-io/date-fns";
 import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
-import { makeStyles, Container, Grid } from "@material-ui/core";
+import { makeStyles, Container, Grid, useMediaQuery } from "@material-ui/core";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 import { returnDate_, departureDate_ } from "../../recoil/state";
 
@@ -22,6 +22,8 @@ function ReturnDatePicker() {
   const departureDate = useRecoilValue(departureDate_);
 
   const [returnDate, setReturnDate] = useRecoilState(returnDate_);
+    const isMobile = useMediaQuery("(max-width: 600px)");
+
 
   
 
@@ -52,7 +54,7 @@ function ReturnDatePicker() {
               className={classes.datepicker}
               allowKeyboardControl={false}
               autoOk={true}
-              variant="inline"
+              variant={isMobile ? "dialog" : "inline"}
               inputVariant="outlined"
               placeholder="Return ?"
               // label="Return"

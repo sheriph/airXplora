@@ -33,6 +33,7 @@ import Filter from "../filter/filter";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 const qs = require("qs");
+import TopBarProgress from "react-topbar-progress-indicator";
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -73,6 +74,15 @@ const FlightOffersList = ({ storeData }) => {
   const uidata = useRecoilValue(flightOffers_);
   const router = useRouter();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  TopBarProgress.config({
+    barColors: {
+      "0": "#f50000",
+      "0.5": "#2ec730",
+      "1.0": "#2ec730",
+    },
+    shadowBlur: 7,
+  });
 
   const alertPop = (message, type) => {
     enqueueSnackbar(message, {
@@ -145,8 +155,10 @@ const FlightOffersList = ({ storeData }) => {
     }
   );
 
-  const fetcher = async (...arg) => {
-    const res = await axiosFlightOffers.request({ data: arg[1] });
+  const fetcher = async () => {
+    const res = await axiosFlightOffers.request({
+      data: JSON.stringify(storeData.lastSearch),
+    });
     if (res.status !== 200) {
       throw new Error("response status not correct");
     }
@@ -154,7 +166,7 @@ const FlightOffersList = ({ storeData }) => {
   };
 
   const { data, error, isValidating, mutate } = useSWR(
-    ["/api/flightofferpost", JSON.stringify(storeData.lastSearch)],
+    "flightOffers",
     fetcher,
     {
       focusThrottleInterval: 86400000,
@@ -166,14 +178,14 @@ const FlightOffersList = ({ storeData }) => {
       shouldRetryOnError: true,
       errorRetryCount: 3,
       onLoadingSlow: () => {
-        alertPop("slow network detected", "warning");
+       // alertPop("slow network detected", "warning");
       },
       onError: (error) => {
-        console.log("on eror", error);
-        alertPop("error getting flight options, trying again ....", "warning");
+      //  console.log("on eror", error);
+      //  alertPop("error getting flight options, trying again ....", "warning");
       },
       onSuccess: (data) => {
-        alertPop("flight options received", "success");
+      //  alertPop("flight options received", "success");
         setRenderedData(data);
       },
       //  initialData: defaultData,
@@ -191,11 +203,12 @@ const FlightOffersList = ({ storeData }) => {
     toggleDrawerState((prev) => !prev);
   };
 
-  if (error) return <>Ouch, something went wrong....</>;
+  // if (error) return <>Ouch, something went wrong....</>;
 
-  if (!data || !uidata)
+  if (!data || !uidata || error)
     return (
       <>
+        {isValidating && <TopBarProgress />}
         {[1, 2, 3, 5, 5].map((item, index) => (
           <Skeleton
             className={classes.skeletonpad}
@@ -212,6 +225,7 @@ const FlightOffersList = ({ storeData }) => {
   if (data.length === 0)
     return (
       <>
+        {isValidating && <TopBarProgress />}
         <Typography>
           Oops, Zero airlines found, please modify your search terms{" "}
         </Typography>
@@ -220,6 +234,7 @@ const FlightOffersList = ({ storeData }) => {
 
   return (
     <>
+      {isValidating && <TopBarProgress />}
       <Grid item xs={12}>
         <PricingTable
           component={
@@ -256,41 +271,39 @@ const FlightOffersList = ({ storeData }) => {
             </Typography>
           ) : (
             <>
-              {uidata.map((flightOffer, index) => {
-                return (
-                  <LazyLoad
-                    key={flightOffer.id}
-                    height={150}
-                    offset={300}
-                    //  unmountIfInvisible
-                    placeholder={
-                      <Container className={classes.placeholdercontainer}>
-                        <Box p={3}>
-                          <Skeleton variant="rect" height={150} />
-                        </Box>
-                      </Container>
-                    }
-                    scroll
-                  >
-                    <Box py={1}>
-                      {isLoading ? (
-                        <Skeleton
-                          className={classes.skeletonpad}
-                          key={index}
-                          width="100%"
-                          height={200}
-                          variant="rect"
-                          component={Paper}
-                        />
-                      ) : (
-                        <Box onClick={() => toggleDrawer(flightOffer)}>
-                          <ResultCard flightOffer={flightOffer} />
-                        </Box>
-                      )}
-                    </Box>
-                  </LazyLoad>
-                );
-              })}
+              {uidata.map((flightOffer, index) => (
+                <LazyLoad
+                  key={flightOffer.id}
+                  height={150}
+                  offset={300}
+                  //  unmountIfInvisible
+                  placeholder={
+                    <Container className={classes.placeholdercontainer}>
+                      <Box p={3}>
+                        <Skeleton variant="rect" height={150} />
+                      </Box>
+                    </Container>
+                  }
+                  scroll
+                >
+                  <Box py={1}>
+                    {isLoading ? (
+                      <Skeleton
+                        className={classes.skeletonpad}
+                        key={index}
+                        width="100%"
+                        height={200}
+                        variant="rect"
+                        component={Paper}
+                      />
+                    ) : (
+                      <Box onClick={() => toggleDrawer(flightOffer)}>
+                        <ResultCard flightOffer={flightOffer} />
+                      </Box>
+                    )}
+                  </Box>
+                </LazyLoad>
+              ))}
               <Drawer
                 className={classes.drawer}
                 anchor="right"
