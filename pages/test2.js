@@ -11,6 +11,7 @@ import Axios from "axios";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { accessToken_, postdatasample_ } from "../recoil/state";
 var qs = require("qs");
+import debounce from "lodash/debounce";
 
 const styles = makeStyles((theme) => ({
   buttontext: {
@@ -29,7 +30,7 @@ const axiosToken = Axios.create({
 //console.log(process.env.NEXT_PUBLIC_ANALYTICS_ID);
 
 export default function PricingTable() {
-  const postdatasample = useRecoilValue(postdatasample_);
+  console.log(debounce);
 
   const axiosAirportName = Axios.create({
     method: "get",

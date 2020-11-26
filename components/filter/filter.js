@@ -36,6 +36,8 @@ import {
 import FilterListIcon from "@material-ui/icons/FilterList";
 import CloseIcon from "@material-ui/icons/Close";
 import { forceCheck } from "react-lazyload";
+import TopBarProgress from "react-topbar-progress-indicator";
+
 
 const useStyles = makeStyles((theme) => ({
   accordiondetailsroot: {
@@ -49,10 +51,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+TopBarProgress.config({
+  barColors: {
+    "0": "#f50000",
+    "0.5": "#2ec730",
+    "1.0": "#2ec730",
+  },
+  shadowBlur: 7,
+});
+
 export default function Filter({ defaultFlightOffers, isMobile }) {
   if (!defaultFlightOffers) return <>Loading..</>;
   const [uidata, updateData] = useRecoilState(flightOffers_);
-  const [iL, setLoading] = useRecoilState(isLoading_);
+  const [loading, setLoading] = useRecoilState(isLoading_);
   const classes = useStyles();
   const [isPriceExpanded, togglePriceExpansion] = useState(true);
   const [isAirlineExpanded, toggleAirlineExpansion] = useState(true);
@@ -171,6 +182,7 @@ export default function Filter({ defaultFlightOffers, isMobile }) {
   if (!defaultFlightOffers) <> Loading </>;
   return (
     <Container>
+      {loading && <TopBarProgress />}
       {isMobile ? (
         <>
           <Box mt={2}>

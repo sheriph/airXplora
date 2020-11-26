@@ -11,7 +11,6 @@ import { SnackbarProvider } from "notistack";
 import Axios from "axios";
 import Head from "next/head";
 import { accessToken_ } from "../recoil/state";
-import { Flipper, Flipped } from "react-flip-toolkit";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdPt_dANbMrCkJCvCtYaxDl-g-UoJvi24",
@@ -27,7 +26,7 @@ const firebaseConfig = {
 const fuego = new Fuego(firebaseConfig);
 
 export default function MyApp(props) {
-  const { Component, pageProps, router } = props;
+  const { Component, pageProps } = props;
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -47,13 +46,7 @@ export default function MyApp(props) {
           <CssBaseline />
           <FuegoProvider fuego={fuego}>
             <RecoilRoot>
-              <Flipper flipKey={router.asPath}>
-                <Flipped flipId="page">
-                  <div>
-                    <Component {...pageProps} />
-                  </div>
-                </Flipped>
-              </Flipper>
+              <Component {...pageProps} />
             </RecoilRoot>
           </FuegoProvider>
         </SnackbarProvider>

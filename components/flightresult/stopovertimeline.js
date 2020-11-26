@@ -30,6 +30,7 @@ import {
 } from "../general/utilities";
 import GetAirlineName from "./getairlinename";
 import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 
 const styles = makeStyles((theme) => ({
   paper: {
@@ -182,8 +183,9 @@ const StopoverTimeline = ({ outBoundSegments, flightOffer }) => {
                     arrow
                     placement="top"
                     PopperProps={{ keepMounted: true }}
+                    enterTouchDelay={0}
                   >
-                    <ErrorOutlineIcon
+                    <HelpOutlineIcon
                       className={classes.errorIcon}
                       color="primary"
                     />

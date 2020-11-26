@@ -12,7 +12,7 @@ import ToSearch from "./tosearch";
 import SwapHorizontalCircleIcon from "@material-ui/icons/SwapHorizontalCircle";
 import SwapVerticalCircleIcon from "@material-ui/icons/SwapVerticalCircle";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
-import { from_, to_ } from "../../recoil/state";
+import { fromcity_, fromLocal_, from_, tocity_, toLocal_, to_ } from "../../recoil/state";
 import { shadows } from "@material-ui/system";
 import clsx from "clsx";
 
@@ -62,24 +62,34 @@ const styles = makeStyles((theme) => ({
 
 const FromAndToSearch = () => {
   const [from, setFrom] = useRecoilState(from_);
+  const [fromLocal, setFromLocal] = useRecoilState(fromLocal_);
+  const [fromCity, setFromCity] = useRecoilState(fromcity_);
   const [to, setTo] = useRecoilState(to_);
-  const swapnow = () => {
-    if (from && to) {
-      setFrom(to);
-      setTo(from);
-      setRotate((prev) => !prev);
-    }
-  };
+  const [toCity, setToCity] = useRecoilState(tocity_);
+  const [toLocal, setToLocal] = useRecoilState(toLocal_);
+
 
   const [rotate, setRotate] = useState(false);
 
   const classes = styles();
+
+  const swapnow = () => {
+    if (from && to) {
+      setFrom(to);
+      setTo(from);
+      setFromLocal(toLocal);
+      setToLocal(fromLocal);
+      setFromCity(toCity);
+      setToCity(fromCity);
+      setRotate((prev) => !prev);
+    }
+  };
   return (
     <Container disableGutters>
       <Hidden xsDown>
         <Grid container alignItems="center" justify="center">
           <Grid xs item>
-            <FromSearch />
+            <FromSearch fromParent={from} />
           </Grid>
           <Grid
             className={classes.icongrid}
@@ -138,7 +148,7 @@ const FromAndToSearch = () => {
             </Grid>
           </Grid>
           <Grid className={classes.tosearchmobile} xs={12} item>
-            <ToSearch />
+            <ToSearch toParent={to} />
           </Grid>
         </Grid>
       </Hidden>

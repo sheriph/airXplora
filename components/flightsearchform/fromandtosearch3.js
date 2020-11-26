@@ -12,7 +12,7 @@ import ToSearch3 from "./tosearch3";
 import SwapHorizontalCircleIcon from "@material-ui/icons/SwapHorizontalCircle";
 import SwapVerticalCircleIcon from "@material-ui/icons/SwapVerticalCircle";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
-import { from3_, to3_ } from "../../recoil/state";
+import { from3_, fromLocal3_, to3_, toLocal3_ } from "../../recoil/state";
 import { shadows } from "@material-ui/system";
 import clsx from "clsx";
 
@@ -62,18 +62,23 @@ const styles = makeStyles((theme) => ({
 
 const FromAndToSearch3 = () => {
   const [from, setFrom] = useRecoilState(from3_);
+  const [fromLocal, setFromLocal] = useRecoilState(fromLocal3_);
   const [to, setTo] = useRecoilState(to3_);
-  const swapnow = () => {
-    if (from && to) {
-      setFrom(to);
-      setTo(from);
-      setRotate((prev) => !prev);
-    }
-  };
+  const [toLocal, setToLocal] = useRecoilState(toLocal3_);
 
   const [rotate, setRotate] = useState(false);
 
   const classes = styles();
+
+  const swapnow = () => {
+    if (from && to) {
+      setFrom(to);
+      setTo(from);
+      setFromLocal(toLocal);
+      setToLocal(fromLocal);
+      setRotate((prev) => !prev);
+    }
+  };
   return (
     <Container disableGutters>
       <Hidden xsDown>
