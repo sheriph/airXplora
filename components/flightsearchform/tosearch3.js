@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -33,10 +33,7 @@ import {
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
-
-
-
-
+import { debounce } from "lodash";
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -62,11 +59,9 @@ const style = makeStyles((theme) => ({
 const ToSearch3 = () => {
   const classes = style();
   const [to, setTo] = useRecoilState(to3_);
-
+  const [inputText, setInputText] = useState("");
   const [toLocal, setToLocal] = useRecoilState(toLocal3_);
-  const [nextFrom, setNextFrom] = useRecoilState(from4_);
-  const [nextFromLocal, setNextFromLocal] = useRecoilState(fromLocal4_);
-  const tripType = useRecoilValue(trip_);
+
   const [toArray, setToArray] = useState(null);
   const [open, setOpen] = React.useState(false);
   const [openSuggestionsPaper, setOpenSuggestionsPaper] = useState(false);
@@ -178,11 +173,13 @@ const ToSearch3 = () => {
     },
   });
 
-  const handleToChange = (e) => {
-    setToLocal(e.target.value);
+  //  console.log("toLocal", toLocal, isValidating, data, error);
+
+  const handleToChange = (val) => {
+    setToLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -190,27 +187,19 @@ const ToSearch3 = () => {
     if (!suggestion) {
       setTo("");
       setToLocal("");
-      if (tripType === "Multi-city") {
-        setNextFrom("");
-        setNextFromLocal("");
-      }
+      setInputText("");
+
       setOpenSuggestionsPaper(false);
       return;
     }
     if (suggestion.subType === "CITY") {
       setToLocal(suggestion.city);
+      setInputText(suggestion.city);
       setTo(suggestion.iataCode);
-      if (tripType === "Multi-city") {
-        setNextFrom(suggestion.iataCode);
-        setNextFromLocal(suggestion.city);
-      }
     } else {
       setTo(suggestion.iataCode);
       setToLocal(suggestion.cityIata);
-      if (tripType === "Multi-city") {
-        setNextFrom(suggestion.iataCode);
-        setNextFromLocal(suggestion.cityIata);
-      }
+      setInputText(suggestion.cityIata);
     }
     setOpenSuggestionsPaper(false);
   };
@@ -218,20 +207,15 @@ const ToSearch3 = () => {
   const handleToClick = () => {
     setTo("");
     setToLocal("");
-    if (tripType === "Multi-city") {
-      setNextFrom("");
-      setNextFromLocal("");
-    }
+    setInputText("");
   };
 
   const handleToClickAway = () => {
     if (!data) {
       setTo("");
       setToLocal("");
-      if (tripType === "Multi-city") {
-        setNextFrom("");
-        setNextFromLocal("");
-      }
+      setInputText("");
+
       setOpenSuggestionsPaper(false);
       return;
     }
@@ -239,17 +223,11 @@ const ToSearch3 = () => {
       if (data[0].subType === "CITY") {
         setTo(data[0].iataCode);
         setToLocal(data[0].city);
-        if (tripType === "Multi-city") {
-          setNextFrom(data[0].iataCode);
-          setNextFromLocal(data[0].city);
-        }
+        setInputText(data[0].city);
       } else {
         setTo(data[0].iataCode);
         setToLocal(data[0].cityIata);
-        if (tripType === "Multi-city") {
-          setNextFrom(data[0].iataCode);
-          setNextFromLocal(data[0].cityIata);
-        }
+        setInputText(data[0].cityIata);
       }
       setOpenSuggestionsPaper(false);
     } else {
@@ -257,10 +235,7 @@ const ToSearch3 = () => {
         setOpen(true);
         setTo("");
         setToLocal("");
-        if (tripType === "Multi-city") {
-          setNextFrom("");
-          setNextFromLocal("");
-        }
+        setInputText("");
       }
 
       setTimeout(() => {
@@ -269,14 +244,19 @@ const ToSearch3 = () => {
     }
   };
 
+  const debounceInput = useCallback(debounce(handleToChange, 1000), []);
+
   return (
     <React.Fragment>
       <div>
         <Paper variant="outlined" className={classes.inputpaper}>
           <InputBase
             placeholder="To Where ?"
-            value={toLocal}
-            onChange={handleToChange}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleToClick}
             className={classes.textField}
             fullWidth
@@ -294,7 +274,7 @@ const ToSearch3 = () => {
               <Paper className={classes.paper} elevation={3}>
                 {isValidating ? <LinearProgress /> : ""}
                 <List component="nav" aria-label="main mailbox folders">
-                  {data
+                  {data && data.length > 0
                     ? data.map((suggestion) => (
                         <React.Fragment key={suggestion.id}>
                           <ListItem button>
@@ -383,5 +363,4 @@ const ToSearch3 = () => {
     </React.Fragment>
   );
 };
-
 export default ToSearch3;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -27,6 +27,8 @@ import { to4_, toLocal4_ } from "../../recoil/state";
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
+import { debounce } from "lodash";
+
 
 
 const style = makeStyles((theme) => ({
@@ -53,17 +55,13 @@ const style = makeStyles((theme) => ({
 const ToSearch4 = () => {
   const classes = style();
   const [to, setTo] = useRecoilState(to4_);
-
+  const [inputText, setInputText] = useState("");
   const [toLocal, setToLocal] = useRecoilState(toLocal4_);
-
   const [toArray, setToArray] = useState(null);
   const [open, setOpen] = React.useState(false);
   const [openSuggestionsPaper, setOpenSuggestionsPaper] = useState(false);
   const [isloading, setIsLoading] = useState(false);
   const source = Axios.CancelToken.source();
-
-
-
 
   const axiosToken = Axios.create({
     method: "post",
@@ -170,15 +168,13 @@ const ToSearch4 = () => {
     },
   });
 
+  //  console.log("toLocal", toLocal, isValidating, data, error);
 
-
-
-
-  const handleToChange = (e) => {
-    setToLocal(e.target.value);
+  const handleToChange = (val) => {
+    setToLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -186,15 +182,19 @@ const ToSearch4 = () => {
     if (!suggestion) {
       setTo("");
       setToLocal("");
+      setInputText("");
+
       setOpenSuggestionsPaper(false);
       return;
     }
     if (suggestion.subType === "CITY") {
       setToLocal(suggestion.city);
+      setInputText(suggestion.city);
       setTo(suggestion.iataCode);
     } else {
       setTo(suggestion.iataCode);
       setToLocal(suggestion.cityIata);
+      setInputText(suggestion.cityIata);
     }
     setOpenSuggestionsPaper(false);
   };
@@ -202,12 +202,14 @@ const ToSearch4 = () => {
   const handleToClick = () => {
     setTo("");
     setToLocal("");
+    setInputText("");
   };
 
   const handleToClickAway = () => {
     if (!data) {
       setTo("");
       setToLocal("");
+      setInputText("");
 
       setOpenSuggestionsPaper(false);
       return;
@@ -216,9 +218,11 @@ const ToSearch4 = () => {
       if (data[0].subType === "CITY") {
         setTo(data[0].iataCode);
         setToLocal(data[0].city);
+        setInputText(data[0].city);
       } else {
         setTo(data[0].iataCode);
         setToLocal(data[0].cityIata);
+        setInputText(data[0].cityIata);
       }
       setOpenSuggestionsPaper(false);
     } else {
@@ -226,6 +230,7 @@ const ToSearch4 = () => {
         setOpen(true);
         setTo("");
         setToLocal("");
+        setInputText("");
       }
 
       setTimeout(() => {
@@ -234,14 +239,19 @@ const ToSearch4 = () => {
     }
   };
 
+  const debounceInput = useCallback(debounce(handleToChange, 1000), []);
+
   return (
     <React.Fragment>
       <div>
         <Paper variant="outlined" className={classes.inputpaper}>
           <InputBase
             placeholder="To Where ?"
-            value={toLocal}
-            onChange={handleToChange}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleToClick}
             className={classes.textField}
             fullWidth
@@ -259,7 +269,7 @@ const ToSearch4 = () => {
               <Paper className={classes.paper} elevation={3}>
                 {isValidating ? <LinearProgress /> : ""}
                 <List component="nav" aria-label="main mailbox folders">
-                  {data
+                  {data && data.length > 0
                     ? data.map((suggestion) => (
                         <React.Fragment key={suggestion.id}>
                           <ListItem button>
@@ -348,5 +358,4 @@ const ToSearch4 = () => {
     </React.Fragment>
   );
 };
-
 export default ToSearch4;

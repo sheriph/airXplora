@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -24,14 +24,12 @@ import CloseIcon from "@material-ui/icons/Close";
 import WarningIcon from "@material-ui/icons/Warning";
 import { prettyWord } from "../general/utilities";
 import { useRecoilState } from "recoil";
-import { from1_, fromLocal1_ } from "../../recoil/state";
+import { from1_, fromLocal1_, toLocal1_ } from "../../recoil/state";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
-
-
-
+import { debounce } from "lodash";
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -56,8 +54,8 @@ const style = makeStyles((theme) => ({
 
 const FromSearch1 = () => {
   const classes = style();
+  const [inputText, setInputText] = useState("");
   const [from, setFrom] = useRecoilState(from1_);
-
   const [fromLocal, setFromLocal] = useRecoilState(fromLocal1_);
   const [fromArray, setFromArray] = useState(null);
   const [open, setOpen] = React.useState(false);
@@ -170,11 +168,13 @@ const FromSearch1 = () => {
     },
   });
 
-  const handleFromChange = (e) => {
-    setFromLocal(e.target.value);
+  //  console.log("fromLocal", fromLocal, isValidating, data, error);
+
+  const handleFromChange = (val) => {
+    setFromLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -182,15 +182,18 @@ const FromSearch1 = () => {
     if (!suggestion) {
       setFrom("");
       setFromLocal("");
+      setInputText("");
       setOpenSuggestionsPaper(false);
       return;
     }
     if (suggestion.subType === "CITY") {
       setFrom(suggestion.iataCode);
       setFromLocal(suggestion.city);
+      setInputText(suggestion.city);
     } else {
       setFrom(suggestion.iataCode);
       setFromLocal(suggestion.cityIata);
+      setInputText(suggestion.cityIata);
     }
 
     setOpenSuggestionsPaper(false);
@@ -199,21 +202,25 @@ const FromSearch1 = () => {
   const handleFromClick = () => {
     setFrom("");
     setFromLocal("");
+    setInputText("");
   };
 
   const handleFromClickAway = () => {
     if (!data) {
       setFrom("");
       setFromLocal("");
+      setInputText("");
       setOpenSuggestionsPaper(false);
       return;
     }
     if (data[0]) {
       if (data[0].subType === "CITY") {
         setFromLocal(data[0].city);
+        setInputText(data[0].city);
         setFrom(data[0].iataCode);
       } else {
         setFromLocal(data[0].cityIata);
+        setInputText(data[0].cityIata);
         setFrom(data[0].iataCode);
       }
       setOpenSuggestionsPaper(false);
@@ -221,14 +228,17 @@ const FromSearch1 = () => {
       if (fromLocal && !data.includes(fromLocal)) {
         setOpen(true);
         setFromLocal("");
+        setInputText("");
         setFrom("");
       }
-
       setTimeout(() => {
         setOpen(false);
       }, 3000);
     }
   };
+
+
+  const debounceInput = useCallback(debounce(handleFromChange, 1000), []);
 
   return (
     <React.Fragment>
@@ -236,8 +246,11 @@ const FromSearch1 = () => {
         <Paper className={classes.inputpaper} variant="outlined">
           <InputBase
             placeholder="Where From ?"
-            value={fromLocal}
-            onChange={(e) => handleFromChange(e)}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleFromClick}
             className={classes.textField}
             fullWidth
@@ -281,7 +294,7 @@ const FromSearch1 = () => {
             <Paper className={classes.paper} elevation={6}>
               {isValidating ? <LinearProgress /> : ""}
               <List component="nav" aria-label="main mailbox folders">
-                {data
+                {data && data.length > 0
                   ? data.map((suggestion) => (
                       <React.Fragment key={suggestion.id}>
                         <ListItem button>

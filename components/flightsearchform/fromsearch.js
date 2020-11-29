@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -29,6 +29,7 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
+import { debounce } from "lodash";
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -53,9 +54,9 @@ const style = makeStyles((theme) => ({
 
 const FromSearch = () => {
   const classes = style();
+  const [inputText, setInputText] = useState("");
   const [from, setFrom] = useRecoilState(from_);
   const [fromcity, setFromCity] = useRecoilState(fromcity_);
-
   const [fromLocal, setFromLocal] = useRecoilState(fromLocal_);
   const [fromArray, setFromArray] = useState(null);
   const [open, setOpen] = React.useState(false);
@@ -78,7 +79,7 @@ const FromSearch = () => {
 
   axiosAirportNames.interceptors.request.use(
     (req) => {
-    //  console.log("req at req interceptor", req);
+      //  console.log("req at req interceptor", req);
       if (!fromLocal) {
         throw new Error(fromLocal);
       }
@@ -88,7 +89,7 @@ const FromSearch = () => {
       return req;
     },
     (error) => {
-   //   console.log("rejecting request b4 its sent");
+      //   console.log("rejecting request b4 its sent");
       Promise.reject(error);
     }
   );
@@ -144,7 +145,7 @@ const FromSearch = () => {
     const res = await axiosAirportNames.request({
       url: `/locations?subType=CITY,AIRPORT&keyword=${fromLocal}`,
     });
-  //  console.log("res in fetcher", res);
+    //  console.log("res in fetcher", res);
     return res;
   };
 
@@ -160,22 +161,21 @@ const FromSearch = () => {
       //  console.log("slow network detected");
     },
     onError: (error) => {
-   //   console.log("error from fetcher", error);
+      //   console.log("error from fetcher", error);
     },
     onSuccess: (data) => {
-   //   console.log("success data", data);
+      //   console.log("success data", data);
       //   setFromArray(data);
     },
   });
 
-//  console.log("fromLocal", fromLocal, isValidating, data, error);
+  //  console.log("fromLocal", fromLocal, isValidating, data, error);
 
-  const handleFromChange = (e) => {
-    setFromLocal(e.target.value);
-
+  const handleFromChange = (val) => {
+    setFromLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -183,6 +183,7 @@ const FromSearch = () => {
     if (!suggestion) {
       setFrom("");
       setFromLocal("");
+      setInputText("");
       setOpenSuggestionsPaper(false);
       return;
     }
@@ -190,10 +191,12 @@ const FromSearch = () => {
       setFrom(suggestion.iataCode);
       setFromCity(suggestion.city);
       setFromLocal(suggestion.city);
+      setInputText(suggestion.city);
     } else {
       setFrom(suggestion.iataCode);
       setFromCity(suggestion.city);
       setFromLocal(suggestion.cityIata);
+      setInputText(suggestion.cityIata);
     }
 
     setOpenSuggestionsPaper(false);
@@ -202,22 +205,26 @@ const FromSearch = () => {
   const handleFromClick = () => {
     setFrom("");
     setFromLocal("");
+    setInputText("");
   };
 
   const handleFromClickAway = () => {
     if (!data) {
       setFrom("");
       setFromLocal("");
+      setInputText("");
       setOpenSuggestionsPaper(false);
       return;
     }
     if (data[0]) {
       if (data[0].subType === "CITY") {
         setFromLocal(data[0].city);
+        setInputText(data[0].city);
         setFrom(data[0].iataCode);
         setFromCity(data[0].city);
       } else {
         setFromLocal(data[0].cityIata);
+        setInputText(data[0].cityIata);
         setFrom(data[0].iataCode);
         setFromCity(data[0].city);
       }
@@ -226,6 +233,7 @@ const FromSearch = () => {
       if (fromLocal && !data.includes(fromLocal)) {
         setOpen(true);
         setFromLocal("");
+        setInputText("");
         setFrom("");
       }
       setTimeout(() => {
@@ -234,14 +242,19 @@ const FromSearch = () => {
     }
   };
 
+  const debounceInput = useCallback(debounce(handleFromChange, 1000), []);
+
   return (
     <React.Fragment>
       <Container disableGutters>
         <Paper className={classes.inputpaper} variant="outlined">
           <InputBase
             placeholder="Where From ?"
-            value={fromLocal}
-            onChange={(e) => handleFromChange(e)}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleFromClick}
             className={classes.textField}
             fullWidth
@@ -285,7 +298,7 @@ const FromSearch = () => {
             <Paper className={classes.paper} elevation={6}>
               {isValidating ? <LinearProgress /> : ""}
               <List component="nav" aria-label="main mailbox folders">
-                {data
+                {data && data.length > 0
                   ? data.map((suggestion) => (
                       <React.Fragment key={suggestion.id}>
                         <ListItem button>
