@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { Box, Button, ButtonBase, Grid } from "@material-ui/core";
+import { Box, Button, ButtonBase, Grid, TextField } from "@material-ui/core";
 import SelectAllIcon from "@material-ui/icons/SelectAll";
 import Axios from "axios";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { accessToken_, postdatasample_ } from "../recoil/state";
 var qs = require("qs");
-import debounce from "lodash/debounce";
+import { debounce, throttle } from "lodash";
 
 const styles = makeStyles((theme) => ({
   buttontext: {
@@ -30,8 +30,6 @@ const axiosToken = Axios.create({
 //console.log(process.env.NEXT_PUBLIC_ANALYTICS_ID);
 
 export default function PricingTable() {
-  console.log(debounce);
-
   const axiosAirportName = Axios.create({
     method: "get",
     baseURL: "https://test.api.amadeus.com/v1/reference-data/locations",
@@ -76,6 +74,17 @@ export default function PricingTable() {
   );
 
   const classes = styles();
+
+  const [value, setValue] = useState("");
+  const [text, setText] = useState("");
+
+  const settingtext = (value) => setText(value);
+
+  const delayedFunction = useCallback(debounce(settingtext, 250), []);
+
+  /*   useEffect(() => {
+    delayedFunction(value);
+  }, [value]); */
 
   return (
     <>
@@ -143,6 +152,15 @@ export default function PricingTable() {
           </Typography>
         </AccordionDetails>
       </Accordion>
+      <TextField
+        variant="outlined"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          delayedFunction(e.target.value);
+        }}
+      />
+      <Typography>{text}</Typography>
     </>
   );
 }

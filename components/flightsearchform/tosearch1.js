@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -33,9 +33,7 @@ import {
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
-
-
-
+import { debounce } from "lodash";
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -61,20 +59,15 @@ const style = makeStyles((theme) => ({
 const ToSearch1 = () => {
   const classes = style();
   const [to, setTo] = useRecoilState(to1_);
-
+  const [inputText, setInputText] = useState("");
   const [toLocal, setToLocal] = useRecoilState(toLocal1_);
-  const [nextFrom, setNextFrom] = useRecoilState(from2_);
-  const [nextFromLocal, setNextFromLocal] = useRecoilState(fromLocal2_);
-  const tripType = useRecoilValue(trip_);
+
   const [toArray, setToArray] = useState(null);
   const [open, setOpen] = React.useState(false);
   const [openSuggestionsPaper, setOpenSuggestionsPaper] = useState(false);
   const [isloading, setIsLoading] = useState(false);
   const source = Axios.CancelToken.source();
 
-
-
-  
   const axiosToken = Axios.create({
     method: "post",
     baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
@@ -90,7 +83,7 @@ const ToSearch1 = () => {
 
   axiosAirportNames.interceptors.request.use(
     (req) => {
-    //  console.log("req at req interceptor", req);
+      //  console.log("req at req interceptor", req);
       if (!toLocal) {
         throw new Error(toLocal);
       }
@@ -100,7 +93,7 @@ const ToSearch1 = () => {
       return req;
     },
     (error) => {
-   //   console.log("rejecting request b4 its sent");
+      //   console.log("rejecting request b4 its sent");
       Promise.reject(error);
     }
   );
@@ -156,7 +149,7 @@ const ToSearch1 = () => {
     const res = await axiosAirportNames.request({
       url: `/locations?subType=CITY,AIRPORT&keyword=${toLocal}`,
     });
-  //  console.log("res in fetcher", res);
+    //  console.log("res in fetcher", res);
     return res;
   };
 
@@ -172,24 +165,21 @@ const ToSearch1 = () => {
       //  console.log("slow network detected");
     },
     onError: (error) => {
-   //   console.log("error from fetcher", error);
+      //   console.log("error from fetcher", error);
     },
     onSuccess: (data) => {
-   //   console.log("success data", data);
+      //   console.log("success data", data);
       //   setFromArray(data);
     },
   });
 
-//  console.log("toLocal", toLocal, isValidating, data, error);
+  //  console.log("toLocal", toLocal, isValidating, data, error);
 
-
-
-
-  const handleToChange = (e) => {
-    setToLocal(e.target.value);
+  const handleToChange = (val) => {
+    setToLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -197,27 +187,19 @@ const ToSearch1 = () => {
     if (!suggestion) {
       setTo("");
       setToLocal("");
-      if (tripType === "Multi-city") {
-        setNextFrom("");
-        setNextFromLocal("");
-      }
+      setInputText("");
+
       setOpenSuggestionsPaper(false);
       return;
     }
     if (suggestion.subType === "CITY") {
       setToLocal(suggestion.city);
+      setInputText(suggestion.city);
       setTo(suggestion.iataCode);
-      if (tripType === "Multi-city") {
-        setNextFrom(suggestion.iataCode);
-        setNextFromLocal(suggestion.city);
-      }
     } else {
       setTo(suggestion.iataCode);
       setToLocal(suggestion.cityIata);
-      if (tripType === "Multi-city") {
-        setNextFrom(suggestion.iataCode);
-        setNextFromLocal(suggestion.cityIata);
-      }
+      setInputText(suggestion.cityIata);
     }
     setOpenSuggestionsPaper(false);
   };
@@ -225,20 +207,15 @@ const ToSearch1 = () => {
   const handleToClick = () => {
     setTo("");
     setToLocal("");
-    if (tripType === "Multi-city") {
-      setNextFrom("");
-      setNextFromLocal("");
-    }
+    setInputText("");
   };
 
   const handleToClickAway = () => {
     if (!data) {
       setTo("");
       setToLocal("");
-      if (tripType === "Multi-city") {
-        setNextFrom("");
-        setNextFromLocal("");
-      }
+      setInputText("");
+
       setOpenSuggestionsPaper(false);
       return;
     }
@@ -246,17 +223,11 @@ const ToSearch1 = () => {
       if (data[0].subType === "CITY") {
         setTo(data[0].iataCode);
         setToLocal(data[0].city);
-        if (tripType === "Multi-city") {
-          setNextFrom(data[0].iataCode);
-          setNextFromLocal(data[0].city);
-        }
+        setInputText(data[0].city);
       } else {
         setTo(data[0].iataCode);
         setToLocal(data[0].cityIata);
-        if (tripType === "Multi-city") {
-          setNextFrom(data[0].iataCode);
-          setNextFromLocal(data[0].cityIata);
-        }
+        setInputText(data[0].cityIata);
       }
       setOpenSuggestionsPaper(false);
     } else {
@@ -264,10 +235,7 @@ const ToSearch1 = () => {
         setOpen(true);
         setTo("");
         setToLocal("");
-        if (tripType === "Multi-city") {
-          setNextFrom("");
-          setNextFromLocal("");
-        }
+        setInputText("");
       }
 
       setTimeout(() => {
@@ -276,14 +244,19 @@ const ToSearch1 = () => {
     }
   };
 
+  const debounceInput = useCallback(debounce(handleToChange, 1000), []);
+
   return (
     <React.Fragment>
       <div>
         <Paper variant="outlined" className={classes.inputpaper}>
           <InputBase
             placeholder="To Where ?"
-            value={toLocal}
-            onChange={handleToChange}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleToClick}
             className={classes.textField}
             fullWidth
@@ -301,7 +274,7 @@ const ToSearch1 = () => {
               <Paper className={classes.paper} elevation={3}>
                 {isValidating ? <LinearProgress /> : ""}
                 <List component="nav" aria-label="main mailbox folders">
-                  {data
+                  {data && data.length > 0
                     ? data.map((suggestion) => (
                         <React.Fragment key={suggestion.id}>
                           <ListItem button>

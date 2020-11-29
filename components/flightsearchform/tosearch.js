@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   makeStyles,
@@ -34,10 +34,7 @@ import {
 import Skeleton from "@material-ui/lab/Skeleton";
 import useSWR from "swr";
 const qs = require("qs");
-
-
-
-
+import { debounce } from "lodash";
 
 const style = makeStyles((theme) => ({
   paper: {
@@ -63,6 +60,7 @@ const style = makeStyles((theme) => ({
 const ToSearch = () => {
   const classes = style();
   const [to, setTo] = useRecoilState(to_);
+  const [inputText, setInputText] = useState("");
   const [toCity, setToCity] = useRecoilState(tocity_);
   const [toLocal, setToLocal] = useRecoilState(toLocal_);
   const [nextFrom, setNextFrom] = useRecoilState(from1_);
@@ -74,8 +72,6 @@ const ToSearch = () => {
   const [isloading, setIsLoading] = useState(false);
   const source = Axios.CancelToken.source();
 
-
-  
   const axiosToken = Axios.create({
     method: "post",
     baseURL: "https://test.api.amadeus.com/v1/security/oauth2/token",
@@ -91,7 +87,7 @@ const ToSearch = () => {
 
   axiosAirportNames.interceptors.request.use(
     (req) => {
-    //  console.log("req at req interceptor", req);
+      //  console.log("req at req interceptor", req);
       if (!toLocal) {
         throw new Error(toLocal);
       }
@@ -101,7 +97,7 @@ const ToSearch = () => {
       return req;
     },
     (error) => {
-   //   console.log("rejecting request b4 its sent");
+      //   console.log("rejecting request b4 its sent");
       Promise.reject(error);
     }
   );
@@ -157,7 +153,7 @@ const ToSearch = () => {
     const res = await axiosAirportNames.request({
       url: `/locations?subType=CITY,AIRPORT&keyword=${toLocal}`,
     });
-  //  console.log("res in fetcher", res);
+    //  console.log("res in fetcher", res);
     return res;
   };
 
@@ -173,22 +169,21 @@ const ToSearch = () => {
       //  console.log("slow network detected");
     },
     onError: (error) => {
-   //   console.log("error from fetcher", error);
+      //   console.log("error from fetcher", error);
     },
     onSuccess: (data) => {
-   //   console.log("success data", data);
+      //   console.log("success data", data);
       //   setFromArray(data);
     },
   });
 
-//  console.log("toLocal", toLocal, isValidating, data, error);
+  //  console.log("toLocal", toLocal, isValidating, data, error);
 
-
-  const handleToChange = (e) => {
-    setToLocal(e.target.value);
+  const handleToChange = (val) => {
+    setToLocal(val);
     setOpenSuggestionsPaper(true);
     if (isValidating === false) {
-      if (data === undefined && e.target.value) mutate();
+      if (data === undefined && val) mutate();
     }
   };
 
@@ -196,6 +191,7 @@ const ToSearch = () => {
     if (!suggestion) {
       setTo("");
       setToLocal("");
+      setInputText("");
       if (tripType === "Multi-city") {
         setNextFrom("");
         setNextFromLocal("");
@@ -205,6 +201,7 @@ const ToSearch = () => {
     }
     if (suggestion.subType === "CITY") {
       setToLocal(suggestion.city);
+      setInputText(suggestion.city);
       setTo(suggestion.iataCode);
       setToCity(suggestion.city);
       if (tripType === "Multi-city") {
@@ -215,6 +212,7 @@ const ToSearch = () => {
       setTo(suggestion.iataCode);
       setToCity(suggestion.city);
       setToLocal(suggestion.cityIata);
+      setInputText(suggestion.cityIata);
       if (tripType === "Multi-city") {
         setNextFrom(suggestion.iataCode);
         setNextFromLocal(suggestion.cityIata);
@@ -226,6 +224,7 @@ const ToSearch = () => {
   const handleToClick = () => {
     setTo("");
     setToLocal("");
+    setInputText("");
     if (tripType === "Multi-city") {
       setNextFrom("");
       setNextFromLocal("");
@@ -236,6 +235,7 @@ const ToSearch = () => {
     if (!data) {
       setTo("");
       setToLocal("");
+      setInputText("");
       if (tripType === "Multi-city") {
         setNextFrom("");
         setNextFromLocal("");
@@ -248,6 +248,7 @@ const ToSearch = () => {
         setTo(data[0].iataCode);
         setToCity(data[0].city);
         setToLocal(data[0].city);
+        setInputText(data[0].city);
         if (tripType === "Multi-city") {
           setNextFrom(data[0].iataCode);
           setNextFromLocal(data[0].city);
@@ -256,6 +257,7 @@ const ToSearch = () => {
         setTo(data[0].iataCode);
         setToCity(data[0].city);
         setToLocal(data[0].cityIata);
+        setInputText(data[0].cityIata);
         if (tripType === "Multi-city") {
           setNextFrom(data[0].iataCode);
           setNextFromLocal(data[0].cityIata);
@@ -267,6 +269,7 @@ const ToSearch = () => {
         setOpen(true);
         setTo("");
         setToLocal("");
+        setInputText("");
         if (tripType === "Multi-city") {
           setNextFrom("");
           setNextFromLocal("");
@@ -279,14 +282,19 @@ const ToSearch = () => {
     }
   };
 
+  const debounceInput = useCallback(debounce(handleToChange, 1000), []);
+
   return (
     <React.Fragment>
       <div>
         <Paper variant="outlined" className={classes.inputpaper}>
           <InputBase
             placeholder="To Where ?"
-            value={toLocal}
-            onChange={handleToChange}
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              debounceInput(e.target.value);
+            }}
             onClick={handleToClick}
             className={classes.textField}
             fullWidth
@@ -304,7 +312,7 @@ const ToSearch = () => {
               <Paper className={classes.paper} elevation={3}>
                 {isValidating ? <LinearProgress /> : ""}
                 <List component="nav" aria-label="main mailbox folders">
-                  {data
+                  {data && data.length > 0
                     ? data.map((suggestion) => (
                         <React.Fragment key={suggestion.id}>
                           <ListItem button>
