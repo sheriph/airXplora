@@ -36,7 +36,9 @@
     "prop-types": "latest",
     "react-color": "^2.19.3",
     "react-flip-toolkit": "^7.0.13",
+    "react-hook-form": "^6.12.1",
     "react-lazyload": "^3.1.0",
+    "react-text-mask": "^5.4.3",
     "react-topbar-progress-indicator": "^4.1.0",
     "recoil": "0.0.10",
     "swr": "^0.3.2"
