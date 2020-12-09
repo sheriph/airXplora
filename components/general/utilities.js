@@ -651,3 +651,112 @@ export const getLayoverPoints = (segments) => {
     return layover;
   }
 };
+
+export const getPassengerInfo = (flightOfferPricing) => {
+  let passengerInfo = [...flightOfferPricing.flightOffers[0].travelerPricings];
+  return passengerInfo.map((props) => {
+    for (let item of flightOfferPricing.bookingRequirements
+      .travelerRequirements) {
+      if (item.travelerId === props.travelerId) {
+        return { ...item, ...props };
+      }
+    }
+  });
+};
+
+export const getPriceRows = (travelerPricings) => {
+  return travelerPricings.map((item) => {
+    return {
+      type: item.travelerType,
+      fare: item.price.base,
+      taxes: Number(item.price.total) - Number(item.price.base),
+      total: item.price.total,
+    };
+  });
+};
+
+export const createOrder = (data, bookedFlightOffer) => {
+  const passengerId = bookedFlightOffer.travelerPricings.map(
+    (item) => item.travelerId
+  );
+  let travellers = [];
+  for (let item of passengerId) {
+    let obj = {};
+    obj.id = item;
+    obj.name = {
+      firstName: data[`givennames${item}`],
+      lastName: data[`surname${item}`],
+    };
+
+    if (data[`dob${item}`])
+      obj.dateOfBirth = data[`dob${item}`].toISOString().split("T")[0];
+    if (data[`gender${item}`]) obj.gender = data[`gender${item}`].toUpperCase();
+
+    obj.contact = {
+      emailAddress: data.email,
+      phones: [
+        {
+          deviceType: "MOBILE",
+          number: data.telephone.replace(/\D+/g, ""),
+        },
+      ],
+    };
+
+    if (data[`passportnumber${item}`])
+      obj.documents = [
+        {
+          documentType: "PASSPORT",
+          number: data[`passportnumber${item}`],
+          expiryDate: data[`passportexpiry${item}`].toISOString().split("T")[0],
+          issuanceCountry: "ES",
+          validityCountry: "ES",
+          nationality: "ES",
+          holder: true,
+        },
+      ];
+
+    travellers.push(obj);
+  }
+
+  return {
+    type: "flight-order",
+    flightOffers: [bookedFlightOffer],
+    travelers: travellers,
+    remarks: {
+      general: [
+        {
+          subType: "GENERAL_MISCELLANEOUS",
+          text: "Online booking from airXplora",
+        },
+      ],
+    },
+    ticketingAgreement: {
+      option: "DELAY_TO_CANCEL",
+      delay: "6D",
+    },
+    contacts: [
+      {
+        addresseeName: {
+          firstName: data.givennames1,
+          lastName: data.surname1,
+        },
+        companyName: "airXplora",
+        purpose: "STANDARD",
+        phones: [
+          {
+            deviceType: "MOBILE",
+            countryCallingCode: "234",
+            number: "9065369929",
+          },
+        ],
+        emailAddress: "info@airxplora.com",
+        address: {
+          lines: ["65c Opebi Road, Ikeja, Lagos"],
+          postalCode: "23401",
+          cityName: "Nigeria",
+          countryCode: "NG",
+        },
+      },
+    ],
+  };
+};

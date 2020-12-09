@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   Box,
+  Paper,
 } from "@material-ui/core";
 import HomeIcon from "@material-ui/icons/Home";
 import PhoneIcon from "@material-ui/icons/Phone";
@@ -31,7 +32,7 @@ const ClassicFooter = () => {
   const classes = styles();
   return (
     <>
-      <Box className={classes.container}>
+      <Box component = {Paper} className={classes.container}>
         <Grid container justify="center">
           <Grid item container direction="column" xs={8} sm={6} spacing={1}>
             <Grid item className={classes.footerTitle}>
