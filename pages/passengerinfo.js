@@ -37,7 +37,7 @@ import ResultCard from "../components/flightresult/classsicresultcard";
 import FlightSumarry from "../components/flightresult/flightsummary";
 import { useRecoilState } from "recoil";
 import { isDrawerOpen_ } from "../recoil/state";
-import { createOrder } from "../components/general/utilities";
+import { createOrder, getFareRules } from "../components/general/utilities";
 import Axios from "axios";
 import useSWR from "swr";
 const qs = require("qs");
@@ -122,6 +122,9 @@ const PassengerInfo = () => {
   const [local, setLocal] = useState(undefined);
   const [isLoading, setLoading] = useState(false);
   const [myOrder, setMyOrder] = useState(undefined);
+  const [offerPricing, setOfferPricing] = useState(undefined);
+  const [fareRules, setFareRules] = useState(undefined);
+
   const router = useRouter();
 
   const axiosToken = Axios.create({
@@ -238,18 +241,27 @@ const PassengerInfo = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const offerPricing = JSON.parse(
+        window.localStorage.getItem("offerPricing")
+      );
+      const fareRules = getFareRules(offerPricing);
+      console.log("fareRules", fareRules);
+      window.localStorage.setItem("fareRules", JSON.stringify(fareRules));
+      setFareRules(fareRules);
+      const bookedFlight = JSON.parse(
+        window.localStorage.getItem("bookedFlightOffer")
+      );
+      setOfferPricing(offerPricing);
+      setBookedFlightOffer(bookedFlight);
+
       const passengerinfo = JSON.parse(
         window.localStorage.getItem("passengerInfo")
       );
-      const flightOffer = JSON.parse(
-        window.localStorage.getItem("bookedFlightOffer")
-      );
-      if (isObject(flightOffer)) {
-        setBookedFlightOffer(flightOffer);
-      }
+
       if (Array.isArray(passengerinfo)) {
         setTravellersProfile(passengerinfo);
       }
+
       setLocal(JSON.parse(window.localStorage.getItem("local")));
     }
   }, []);
@@ -263,7 +275,7 @@ const PassengerInfo = () => {
   }, [isLoading]);
 
   //if (isEmpty(travellersProfile)) return <> Loading ...</>;
-
+  console.log("fareRules", fareRules);
   return (
     <Container maxWidth="xl" className={classes.container}>
       <Grid container>
@@ -380,6 +392,7 @@ const PassengerInfo = () => {
                 flightOffer={bookedFlightOffer}
                 prevState={local.prevState}
                 noShowHeader={true}
+                farePenalties={fareRules}
               />
             ) : (
               "Loading"

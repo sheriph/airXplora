@@ -25,7 +25,8 @@ const SuccessfullBooking = () => {
   const classes = styles();
   const [local, setLocal] = useState(undefined);
   const [bookedFlightOffer, setFlightOffer] = useState(undefined);
-  const [flightOrder, setFlightOrder] = useState(undefined)
+  const [flightOrder, setFlightOrder] = useState(undefined);
+  const [fareRules, setFareRules] = useState(undefined);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -33,9 +34,12 @@ const SuccessfullBooking = () => {
       setFlightOffer(
         JSON.parse(window.localStorage.getItem("bookedFlightOffer"))
       );
-      setFlightOrder(JSON.parse(window.localStorage.getItem("flightOrder")))
+      setFlightOrder(JSON.parse(window.localStorage.getItem("flightOrder")));
+      setFareRules(JSON.parse(window.localStorage.getItem("fareRules")));
     }
   }, [null]);
+
+  console.log("sucess fare rules", fareRules);
   return (
     <Container disableGutters maxWidth="xl" className={classes.container}>
       <Grid container>
@@ -51,7 +55,8 @@ const SuccessfullBooking = () => {
             noShowHeader={true}
             noShowHeader2={true}
             successfulBooking={true}
-            flightOrder = {flightOrder}
+            flightOrder={flightOrder}
+            farePenalties={fareRules}
           />
         ) : (
           ""
