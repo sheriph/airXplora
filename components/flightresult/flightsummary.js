@@ -46,6 +46,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import PriceSummary from "./pricesummarytable";
 const qs = require("qs");
 import Alert from "@material-ui/lab/Alert";
+import { useSnackbar } from "notistack";
 
 const styles = makeStyles((theme) => ({
   paper: {
@@ -109,6 +110,8 @@ const FlightSumarry = ({
   noShowHeader2,
   successfulBooking,
   flightOrder,
+  offerPricing,
+  farePenalties,
 }) => {
   const isMobile = useMediaQuery("(max-width: 600px)");
   const classes = styles();
@@ -116,7 +119,20 @@ const FlightSumarry = ({
   const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
-  // const prevState = useRecoilValue(prevState_);
+  const [showPriceTable, setShowPrice] = useState(false);
+  const [showFareRules, setShowFare] = useState(false);
+  console.log("farePenalties", farePenalties);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const alertPop = (message, type) => {
+    enqueueSnackbar(message, {
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      variant: type,
+    });
+  };
+
   if (!flightOffer || !prevState) return <>Loading ...</>;
 
   const priceVerifierObj = {
@@ -136,7 +152,8 @@ const FlightSumarry = ({
 
   const axiosConfirmPrice = Axios.create({
     method: "post",
-    baseURL: "https://test.api.amadeus.com/v1/shopping/flight-offers/pricing",
+    baseURL:
+      "https://test.api.amadeus.com/v1/shopping/flight-offers/pricing?include=detailed-fare-rules&forceClass=false",
     headers: {
       "Content-Type": "application/json",
     },
@@ -199,35 +216,47 @@ const FlightSumarry = ({
     refreshInterval: 86400000,
     shouldRetryOnError: true,
     errorRetryCount: 3,
-    errorRetryInterval: 3000,
+    errorRetryInterval: 100,
     initialData: [],
     onLoadingSlow: () => {
       //  console.log("slow network detected");
     },
     onError: (error) => {
-      console.log("error from fetcher", error);
+      console.log("error from fetcher", error, error.response);
     },
     onSuccess: (data) => {
-      //  setPriceValid(true);
+      console.log("running post success data");
       console.log("success data", data.data);
-      const passengerInfo = getPassengerInfo(data.data.data);
-      console.log("passengerInfo", passengerInfo);
-      if (data.data.data) {
-        window.localStorage.setItem(
-          "passengerInfo",
-          JSON.stringify(passengerInfo)
+      if (data.data.warning) {
+        alertPop(data.data.warning.detail, "warning");
+        if (data.data.warning.code === "0") {
+          alertPop(
+            "Fares keep changing as many people are booking. Always complete your booking faster to avoid fare increase change",
+            "success"
+          );
+        }
+        alertPop(
+          "Sorry, we are redirecting you to the search result.",
+          "warning"
         );
-        window.localStorage.setItem(
-          "bookedFlightOffer",
-          JSON.stringify(flightOffer)
-        );
+
+        setTimeout(() => {
+          router.push("/flightresult");
+        }, 5000);
+        return;
       }
-      setIsLoading(false);
+      window.localStorage.setItem(
+        "passengerInfo",
+        JSON.stringify(getPassengerInfo(data.data.data))
+      );
+      window.localStorage.setItem(
+        "bookedFlightOffer",
+        JSON.stringify(flightOffer)
+      );
+      window.localStorage.setItem("offerPricing", JSON.stringify(data.data));
+    //  setIsLoading(false);
       toggleDrawerState(false);
       router.push("/passengerinfo");
-
-      // window.sessionStorage.setItem("bookingData", JSON.stringify(data));
-      //   setFromArray(data);
     },
   });
 
@@ -239,7 +268,7 @@ const FlightSumarry = ({
         {successfulBooking && (
           <Alert severity="success">
             Your reservation is confirmed with booking reference{" "}
-            <Typography display = "inline" variant = "subtitle2">
+            <Typography display="inline" variant="subtitle2">
               {flightOrder && flightOrder.associatedRecords[0].reference}
             </Typography>
           </Alert>
@@ -250,7 +279,8 @@ const FlightSumarry = ({
               {noShowHeader2 === undefined ? (
                 <Grid
                   item
-                  xs="auto"
+                  xs={2}
+                  sm
                   onClick={() => {
                     console.log("close drawer");
                     toggleDrawerState(false);
@@ -261,11 +291,15 @@ const FlightSumarry = ({
               ) : (
                 ""
               )}
-              <Grid xs item container justify="center" spacing={1}>
+              <Grid xs={5} sm item container justify="center" spacing={1}>
                 <Grid
                   item
                   // xs="auto"
-                  onClick={(e) => setExpanded((prev) => !prev)}
+                  onClick={(e) => {
+                    setExpanded((prev) => !prev);
+                    setShowFare(false);
+                    setShowPrice(true);
+                  }}
                 >
                   <Typography color="primary">
                     &#8358;{formatPrice(flightOffer.price.total)}
@@ -274,7 +308,11 @@ const FlightSumarry = ({
                 <Grid
                   item
                   //  xs="auto"
-                  onClick={(e) => setExpanded((prev) => !prev)}
+                  onClick={(e) => {
+                    setExpanded((prev) => !prev);
+                    setShowFare(false);
+                    setShowPrice(true);
+                  }}
                 >
                   <ExpandMoreIcon
                     className={
@@ -290,35 +328,88 @@ const FlightSumarry = ({
                 <Grid item xs="auto">
                   <Button
                     size="small"
-                    disabled={isLoading}
+                    disabled={isValidating}
                     onClick={() => {
-                      setIsLoading(true);
-                      mutate();
+                     // setIsLoading(true);
+                      mutate([], true);
                     }}
                     variant="contained"
                     color="primary"
                     fullWidth
                     endIcon={
-                      isLoading ? (
+                      isValidating ? (
                         <CircularProgress size="20px" color="primary" />
                       ) : (
                         ""
                       )
                     }
                   >
-                    {isLoading ? "Booking..." : "Book Now"}
+                    {isValidating ? "Booking..." : "Book Now"}
                   </Button>
                 </Grid>
               ) : (
-                ""
+                <Grid xs={5} sm item container justify="center" spacing={1}>
+                  <Grid
+                    item
+                    // xs="auto"
+                    onClick={(e) => {
+                      setExpanded((prev) => !prev);
+                      setShowFare(true);
+                      setShowPrice(false);
+                    }}
+                  >
+                    <Typography color="primary">Ticket Rules</Typography>
+                  </Grid>
+                  <Grid
+                    item
+                    //  xs="auto"
+                    onClick={(e) => {
+                      setExpanded((prev) => !prev);
+                      setShowFare(true);
+                      setShowPrice(false);
+                    }}
+                  >
+                    <ExpandMoreIcon
+                      className={
+                        expanded
+                          ? "MuiAccordionSummary-expandIcon Mui-expanded"
+                          : ""
+                      }
+                      color="primary"
+                    />
+                  </Grid>
+                </Grid>
               )}
             </Grid>
           </AccordionSummary>
           <AccordionDetails>
             <Grid container justify="center">
-              <Grid item>
-                <PriceSummary flightOffer={flightOffer} />
-              </Grid>
+              {showPriceTable && (
+                <Grid item>
+                  <PriceSummary flightOffer={flightOffer} />
+                </Grid>
+              )}
+              {showFareRules && (
+                <Grid item>
+                  <Box>
+                    {farePenalties &&
+                      farePenalties.map((rule, index) => (
+                        <Box pb={2} key={index}>
+                          <Typography gutterBottom variant="caption">
+                            FARE CODE: {rule.fareBasis} | {rule.name}
+                          </Typography>
+                          <Divider variant="fullWidth" />
+                          <Typography variant="caption">
+                            {rule.details.map((text, index) => (
+                              <span key={index}>{text.text}</span>
+                            ))}
+                          </Typography>
+                          <Divider variant="fullWidth" />
+                        </Box>
+                      ))}
+                  </Box>
+                </Grid>
+              )}
             </Grid>
           </AccordionDetails>
         </Accordion>

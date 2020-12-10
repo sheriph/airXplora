@@ -653,8 +653,11 @@ export const getLayoverPoints = (segments) => {
 };
 
 export const getPassengerInfo = (flightOfferPricing) => {
-  let passengerInfo = [...flightOfferPricing.flightOffers[0].travelerPricings];
+  let travelerPricings = flightOfferPricing.flightOffers[0].travelerPricings;
+  let passengerInfo = [...travelerPricings];
   return passengerInfo.map((props) => {
+    if (!flightOfferPricing.bookingRequirements.travelerRequirements)
+      return { ...props };
     for (let item of flightOfferPricing.bookingRequirements
       .travelerRequirements) {
       if (item.travelerId === props.travelerId) {
@@ -759,4 +762,23 @@ export const createOrder = (data, bookedFlightOffer) => {
       },
     ],
   };
+};
+
+export const getFareRules = (detailedFare) => {
+  console.log("detailedFare", detailedFare);
+  if (!detailedFare.included) return undefined;
+  let fareRules = [];
+  for (let item in detailedFare.included["detailed-fare-rules"]) {
+    let rules = {};
+    rules.fareBasis =
+      detailedFare.included["detailed-fare-rules"][item].fareBasis;
+    rules.name = detailedFare.included["detailed-fare-rules"][item].name;
+    rules.details = detailedFare.included["detailed-fare-rules"][
+      item
+    ].fareNotes.descriptions.filter(
+      (item) => item.descriptionType === "PENALTIES"
+    );
+    fareRules.push(rules);
+  }
+  return fareRules;
 };
