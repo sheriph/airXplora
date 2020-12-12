@@ -125,6 +125,7 @@ const PassengerInfo = () => {
   const [offerPricing, setOfferPricing] = useState(undefined);
   const [fareRules, setFareRules] = useState(undefined);
   const [counter, setCounter] = useState(0);
+  const [isMutate, setMutate] = useState(false);
 
   const router = useRouter();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -222,6 +223,7 @@ const PassengerInfo = () => {
       },
       onError: (error) => {
         console.log("error from fetcher", error.response, error);
+        // setMutate(false);
       },
       onSuccess: (data) => {
         console.log("success data", data);
@@ -229,7 +231,7 @@ const PassengerInfo = () => {
           "flightOrder",
           JSON.stringify(data.data.data)
         );
-        setLoading(false);
+      //  setMutate(false);
         router.push("/success");
       },
     }
@@ -238,6 +240,9 @@ const PassengerInfo = () => {
   console.log("isValidating", isValidating);
 
   const onSubmit = async (submissionData) => {
+    const order = createOrder(submissionData, bookedFlightOffer);
+    setMyOrder({ data: order });
+    setLoading(true);
     const priceVerifierObj = {
       data: {
         type: "flight-offers-pricing",
@@ -315,9 +320,13 @@ const PassengerInfo = () => {
 
     const res = await axiosConfirmPrice
       .request({ data: priceVerifierObj })
-      .catch((err) => console.log("catch block", err));
+      .catch((err) => {
+        console.log("catch block", err);
+        setLoading(false);
+      });
 
     if (res) {
+      setLoading(true);
       console.log("price verified", res.data);
 
       if (res.data.warning) {
@@ -332,7 +341,7 @@ const PassengerInfo = () => {
           "Sorry, we are redirecting you to the search result.",
           "warning"
         );
-
+        setLoading(false);
         setTimeout(() => {
           router.push("/flightresult");
         }, 5000);
@@ -341,15 +350,13 @@ const PassengerInfo = () => {
 
       console.log("submittion data", submissionData);
 
-      const order = createOrder(submissionData, bookedFlightOffer);
       console.log("order", order);
       // fetcher({ data: order });
-      setMyOrder({ data: order });
-      setLoading(true);
+      setLoading(false);
+      mutate([], true);
+      // setMutate(true);
       // mutate([], true);
     }
-
-    
   };
 
   console.log("errors", errors);
@@ -379,13 +386,13 @@ const PassengerInfo = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (isLoading) {
+  /*   useEffect(() => {
+    if (isMutate) {
       console.log("isloading", myOrder);
 
       mutate([], true);
     }
-  }, [isLoading]);
+  }, [isMutate]); */
 
   useEffect(() => {
     //this test for stale and undefined data
@@ -431,7 +438,7 @@ const PassengerInfo = () => {
             <Skeleton variant="rect" height={118} />
           )}
         </Grid>
-        <Container>
+        <Container disableGutters>
           {travellersProfile ? (
             <Grid
               component={Paper}
@@ -448,7 +455,7 @@ const PassengerInfo = () => {
                       {travellersProfile.map((item, index) => {
                         let ageLimit = 120;
                         if (item.travelerType === "CHILD") {
-                          ageLimit = 12;
+                          ageLimit = 11;
                         } else if (item.travelerType === "HELD_INFANT") {
                           ageLimit = 2;
                         }
@@ -496,16 +503,18 @@ const PassengerInfo = () => {
                         endIcon={<NavigateNextIcon />}
                         type="submit"
                         size="small"
-                        disabled={!checked || isLoading}
+                        disabled={!checked || isLoading || isValidating}
                         endIcon={
-                          isLoading ? (
+                          isLoading || isValidating ? (
                             <CircularProgress size="20px" color="primary" />
                           ) : (
                             ""
                           )
                         }
                       >
-                        {isLoading ? "CONFIRMING SEAT .." : "Complete Booking"}
+                        {isLoading || isValidating
+                          ? "CONFIRMING SEAT .."
+                          : "Complete Booking"}
                       </Button>
                     </Grid>
                   </Grid>
