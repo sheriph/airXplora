@@ -223,6 +223,12 @@ const PassengerInfo = () => {
       },
       onError: (error) => {
         console.log("error from fetcher", error.response, error);
+        if (error.response) {
+          for (let item of error.response.data.errors) {
+            alertPop(item.title, "info");
+            alertPop(item.detail, "info");
+          }
+        }
         // setMutate(false);
       },
       onSuccess: (data) => {
@@ -231,7 +237,7 @@ const PassengerInfo = () => {
           "flightOrder",
           JSON.stringify(data.data.data)
         );
-      //  setMutate(false);
+        //  setMutate(false);
         router.push("/success");
       },
     }
