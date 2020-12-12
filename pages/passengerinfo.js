@@ -124,8 +124,19 @@ const PassengerInfo = () => {
   const [myOrder, setMyOrder] = useState(undefined);
   const [offerPricing, setOfferPricing] = useState(undefined);
   const [fareRules, setFareRules] = useState(undefined);
+  const [counter, setCounter] = useState(0);
 
   const router = useRouter();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const alertPop = (message, type) => {
+    enqueueSnackbar(message, {
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      variant: type,
+    });
+  };
 
   const axiosToken = Axios.create({
     method: "post",
@@ -226,15 +237,119 @@ const PassengerInfo = () => {
 
   console.log("isValidating", isValidating);
 
-  const onSubmit = (data) => {
-    console.log("submitting", data);
+  const onSubmit = async (submissionData) => {
+    const priceVerifierObj = {
+      data: {
+        type: "flight-offers-pricing",
+        flightOffers: [bookedFlightOffer],
+      },
+    };
+    console.log("priceVerifierObj", priceVerifierObj);
 
-    const order = createOrder(data, bookedFlightOffer);
-    console.log("order", order);
-    // fetcher({ data: order });
-    setMyOrder({ data: order });
-    setLoading(true);
-    // mutate([], true);
+    const axiosConfirmPrice = Axios.create({
+      method: "post",
+      baseURL:
+        "https://test.api.amadeus.com/v1/shopping/flight-offers/pricing?include=detailed-fare-rules&forceClass=false",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    axiosConfirmPrice.interceptors.request.use(
+      (req) => {
+        req.headers = {
+          Authorization: `Bearer ${window.sessionStorage.getItem(
+            "accessToken"
+          )}`,
+        };
+        return req;
+      },
+      (error) => {
+        //  console.log("rejecting request b4 its sent");
+        Promise.reject(error);
+      }
+    );
+
+    axiosConfirmPrice.interceptors.response.use(
+      (res) => {
+        if (res.status !== 200) {
+          throw new Error("error response in interceptor", res.statusText);
+        }
+        return res;
+      },
+      async (error) => {
+        if (
+          error.response &&
+          error.response.config &&
+          error.response.status === 401
+        ) {
+          await axiosToken
+            .request({
+              data: qs.stringify({
+                client_id: " kYUgZVtfSuy1NmE3kzGwtubzWGteoK1z",
+                client_secret: "KDvXBul4gw1pL6rg",
+                grant_type: "client_credentials",
+              }),
+            })
+            .then((res) => {
+              console.log(
+                "token at response interceptor",
+                res.data.access_token
+              );
+              window.sessionStorage.setItem(
+                "accessToken",
+                res.data.access_token
+              );
+              setCounter((prev) => prev + 1);
+              if (counter < 3) {
+                console.log("trying again");
+                onSubmit(submissionData);
+                return;
+              }
+            })
+            .catch((err) => console.log(err.response));
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    const res = await axiosConfirmPrice
+      .request({ data: priceVerifierObj })
+      .catch((err) => console.log("catch block", err));
+
+    if (res) {
+      console.log("price verified", res.data);
+
+      if (res.data.warning) {
+        alertPop(res.data.warning.detail, "warning");
+        if (res.data.warning.code === "0") {
+          alertPop(
+            "Fares keep changing as many people are booking. Always complete your booking faster to avoid fare increase change",
+            "success"
+          );
+        }
+        alertPop(
+          "Sorry, we are redirecting you to the search result.",
+          "warning"
+        );
+
+        setTimeout(() => {
+          router.push("/flightresult");
+        }, 5000);
+        return;
+      }
+
+      console.log("submittion data", submissionData);
+
+      const order = createOrder(submissionData, bookedFlightOffer);
+      console.log("order", order);
+      // fetcher({ data: order });
+      setMyOrder({ data: order });
+      setLoading(true);
+      // mutate([], true);
+    }
+
+    
   };
 
   console.log("errors", errors);
@@ -261,8 +376,6 @@ const PassengerInfo = () => {
       if (Array.isArray(passengerinfo)) {
         setTravellersProfile(passengerinfo);
       }
-
-      setLocal(JSON.parse(window.localStorage.getItem("local")));
     }
   }, []);
 
@@ -273,6 +386,33 @@ const PassengerInfo = () => {
       mutate([], true);
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    //this test for stale and undefined data
+    if (typeof window !== "undefined") {
+      const local = JSON.parse(window.localStorage.getItem("local"));
+      if (local === "undefined") {
+        alertPop(
+          "you have made any search, please search for a flight on the homepage",
+          "success"
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      }
+      const departureDate = local.prevState.departureDate;
+      if (new Date(departureDate).getTime() < new Date().getTime()) {
+        alertPop(
+          "travel date is in the past, redirecting to homepage",
+          "success"
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      }
+      setLocal(local);
+    }
+  }, []);
 
   //if (isEmpty(travellersProfile)) return <> Loading ...</>;
   console.log("fareRules", fareRules);

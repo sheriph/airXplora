@@ -39,6 +39,8 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import FareCalendar from "../components/flightresult/farecalendar";
 import PricingTable from "../components/flightresult/pricingtable";
 import FlightOffersList from "../components/flightresult/flightofferslist";
+import { useSnackbar } from "notistack";
+import { useRouter } from "next/router";
 
 const styles = makeStyles((theme) => ({
   baseBox: {
@@ -73,12 +75,46 @@ const styles = makeStyles((theme) => ({
 const FlightResult = () => {
   const classes = styles();
   const [local, setLocal] = useState(null);
+  const router = useRouter();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const alertPop = (message, type) => {
+    enqueueSnackbar(message, {
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      variant: type,
+    });
+  };
+
+
 
   useEffect(() => {
+    //this test for stale and undefined data
     if (typeof window !== "undefined") {
-      setLocal(JSON.parse(window.localStorage.getItem("local")));
+      const local = JSON.parse(window.localStorage.getItem("local"));
+      if (local === "undefined") {
+        alertPop(
+          "you have made any search, please search for a flight on the homepage",
+          "success"
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      }
+      const departureDate = local.prevState.departureDate;
+      if (new Date(departureDate).getTime() < new Date().getTime()) {
+        alertPop(
+          "travel date is in the past, redirecting to hompage",
+          "success"
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      }
+      setLocal(local);
     }
-  }, [null]);
+  }, []);
 
   return (
     <Container disableGutters maxWidth="xl" className={classes.container}>

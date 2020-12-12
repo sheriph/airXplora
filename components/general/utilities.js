@@ -656,14 +656,16 @@ export const getPassengerInfo = (flightOfferPricing) => {
   let travelerPricings = flightOfferPricing.flightOffers[0].travelerPricings;
   let passengerInfo = [...travelerPricings];
   return passengerInfo.map((props) => {
-    if (!flightOfferPricing.bookingRequirements.travelerRequirements)
-      return { ...props };
-    for (let item of flightOfferPricing.bookingRequirements
-      .travelerRequirements) {
-      if (item.travelerId === props.travelerId) {
-        return { ...item, ...props };
+    if (flightOfferPricing.bookingRequirements.travelerRequirements) {
+      for (let item of flightOfferPricing.bookingRequirements
+        .travelerRequirements) {
+        if (item.travelerId === props.travelerId) {
+          return { ...item, ...props };
+        }
       }
+     // return { ...props };
     }
+    return { ...props };
   });
 };
 

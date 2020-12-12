@@ -47,6 +47,7 @@ import PriceSummary from "./pricesummarytable";
 const qs = require("qs");
 import Alert from "@material-ui/lab/Alert";
 import { useSnackbar } from "notistack";
+import cookieCutter from "cookie-cutter";
 
 const styles = makeStyles((theme) => ({
   paper: {
@@ -126,9 +127,9 @@ const FlightSumarry = ({
   const alertPop = (message, type) => {
     enqueueSnackbar(message, {
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
-      },
+        vertical: 'bottom',
+        horizontal: 'left',
+    },
       variant: type,
     });
   };
@@ -223,6 +224,12 @@ const FlightSumarry = ({
     },
     onError: (error) => {
       console.log("error from fetcher", error, error.response);
+      if (error.response) {
+        for (let item of error.response.data.errors) {
+          alertPop(item.title, "info");
+          alertPop(item.detail, "info");
+        }
+      }
     },
     onSuccess: (data) => {
       console.log("running post success data");
@@ -232,12 +239,12 @@ const FlightSumarry = ({
         if (data.data.warning.code === "0") {
           alertPop(
             "Fares keep changing as many people are booking. Always complete your booking faster to avoid fare increase change",
-            "success"
+            "info"
           );
         }
         alertPop(
           "Sorry, we are redirecting you to the search result.",
-          "warning"
+          "info"
         );
 
         setTimeout(() => {
@@ -253,14 +260,13 @@ const FlightSumarry = ({
         "bookedFlightOffer",
         JSON.stringify(flightOffer)
       );
+
       window.localStorage.setItem("offerPricing", JSON.stringify(data.data));
-    //  setIsLoading(false);
+      //  setIsLoading(false);
       toggleDrawerState(false);
       router.push("/passengerinfo");
     },
   });
-
-  console.log("flightOffer", flightOffer);
 
   return (
     <React.Fragment>
@@ -330,7 +336,7 @@ const FlightSumarry = ({
                     size="small"
                     disabled={isValidating}
                     onClick={() => {
-                     // setIsLoading(true);
+                      // setIsLoading(true);
                       mutate([], true);
                     }}
                     variant="contained"
