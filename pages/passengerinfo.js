@@ -463,7 +463,7 @@ const PassengerInfo = () => {
                         if (item.travelerType === "CHILD") {
                           ageLimit = 11;
                         } else if (item.travelerType === "HELD_INFANT") {
-                          ageLimit = 2;
+                          ageLimit = 1;
                         }
 
                         return (
