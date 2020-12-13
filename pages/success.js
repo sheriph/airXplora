@@ -42,8 +42,6 @@ const SuccessfullBooking = () => {
     });
   };
 
-
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       setFlightOffer(
@@ -70,10 +68,7 @@ const SuccessfullBooking = () => {
       }
       const departureDate = local.prevState.departureDate;
       if (new Date(departureDate).getTime() < new Date().getTime()) {
-        alertPop(
-          "travel date is in the past, redirecting to hompage",
-          "info"
-        );
+        alertPop("travel date is in the past, redirecting to hompage", "info");
         setTimeout(() => {
           router.push("/");
         }, 3000);
@@ -100,6 +95,7 @@ const SuccessfullBooking = () => {
             successfulBooking={true}
             flightOrder={flightOrder}
             farePenalties={fareRules}
+            travelers={flightOrder.travelers}
           />
         ) : (
           ""

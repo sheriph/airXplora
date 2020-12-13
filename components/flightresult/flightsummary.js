@@ -48,6 +48,7 @@ const qs = require("qs");
 import Alert from "@material-ui/lab/Alert";
 import { useSnackbar } from "notistack";
 import cookieCutter from "cookie-cutter";
+import PassengerList from "./passengerlist";
 
 const styles = makeStyles((theme) => ({
   paper: {
@@ -97,7 +98,7 @@ const styles = makeStyles((theme) => ({
   },
   inboundcard: {
     position: "relative",
-    bottom: "40px",
+  //  bottom: "20px",
   },
   sumarryGrid: {
     paddingTop: "15px",
@@ -113,6 +114,7 @@ const FlightSumarry = ({
   flightOrder,
   offerPricing,
   farePenalties,
+  travelers,
 }) => {
   const isMobile = useMediaQuery("(max-width: 600px)");
   const classes = styles();
@@ -127,9 +129,9 @@ const FlightSumarry = ({
   const alertPop = (message, type) => {
     enqueueSnackbar(message, {
       anchorOrigin: {
-        vertical: 'bottom',
-        horizontal: 'left',
-    },
+        vertical: "bottom",
+        horizontal: "left",
+      },
       variant: type,
     });
   };
@@ -242,10 +244,7 @@ const FlightSumarry = ({
             "info"
           );
         }
-        alertPop(
-          "Sorry, we are redirecting you to the search result.",
-          "info"
-        );
+        alertPop("Sorry, we are redirecting you to the search result.", "info");
 
         setTimeout(() => {
           router.push("/flightresult");
@@ -277,6 +276,7 @@ const FlightSumarry = ({
             <Typography display="inline" variant="subtitle2">
               {flightOrder && flightOrder.associatedRecords[0].reference}
             </Typography>
+            <PassengerList travelers={travelers} />
           </Alert>
         )}
         <Accordion expanded={expanded}>
