@@ -126,6 +126,7 @@ const PassengerInfo = () => {
   const [fareRules, setFareRules] = useState(undefined);
   const [counter, setCounter] = useState(0);
   const [isMutate, setMutate] = useState(false);
+  const [shouldFetch, setFetch] = useState(false);
 
   const router = useRouter();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -206,20 +207,21 @@ const PassengerInfo = () => {
     return res;
   };
 
-  const { data, error, isValidating, mutate } = useSWR(
-    ["/api", myOrder],
+  const { data, error, isValidating } = useSWR(
+    shouldFetch ? ["/api", myOrder] : null,
     fetcher,
     {
-      focusThrottleInterval: 86400000,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      refreshInterval: 86400000,
-      shouldRetryOnError: true,
-      errorRetryCount: 3,
-      errorRetryInterval: 3000,
-      initialData: [],
-      onLoadingSlow: () => {
-        //  console.log("slow network detected");
+      onErrorRetry: (error, key, option, revalidate, { retryCount }) => {
+        console.log("retryCount", retryCount);
+        if (retryCount >= 4) {
+          setFetch(false);
+          return;
+        }
+        console.log("trying again");
+
+        setTimeout(() => {
+          revalidate({ retryCount: retryCount + 1 });
+        }, 500);
       },
       onError: (error) => {
         console.log("error from fetcher", error.response, error);
@@ -237,8 +239,11 @@ const PassengerInfo = () => {
           "flightOrder",
           JSON.stringify(data.data.data)
         );
+        setFetch(false);
         //  setMutate(false);
-        router.push("/success");
+        router.push("/success").then((res) => {
+          window.scrollTo(0, 0);
+        });
       },
     }
   );
@@ -349,7 +354,9 @@ const PassengerInfo = () => {
         );
         setLoading(false);
         setTimeout(() => {
-          router.push("/flightresult");
+          router.push("/flightresult").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 5000);
         return;
       }
@@ -359,7 +366,7 @@ const PassengerInfo = () => {
       console.log("order", order);
       // fetcher({ data: order });
       setLoading(false);
-      mutate([], true);
+      setFetch(true);
       // setMutate(true);
       // mutate([], true);
     }
@@ -410,7 +417,9 @@ const PassengerInfo = () => {
           "success"
         );
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       const departureDate = local.prevState.departureDate;
@@ -420,7 +429,9 @@ const PassengerInfo = () => {
           "success"
         );
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       setLocal(local);

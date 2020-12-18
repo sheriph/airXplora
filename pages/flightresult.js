@@ -99,7 +99,9 @@ const FlightResult = () => {
           "success"
         );
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       const departureDate = local.prevState.departureDate;
@@ -109,7 +111,9 @@ const FlightResult = () => {
           "success"
         );
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       setLocal(local);

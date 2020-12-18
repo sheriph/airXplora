@@ -98,7 +98,7 @@ const styles = makeStyles((theme) => ({
   },
   inboundcard: {
     position: "relative",
-  //  bottom: "20px",
+    //  bottom: "20px",
   },
   sumarryGrid: {
     paddingTop: "15px",
@@ -119,11 +119,12 @@ const FlightSumarry = ({
   const isMobile = useMediaQuery("(max-width: 600px)");
   const classes = styles();
   const [isDrawerOpen, toggleDrawerState] = useRecoilState(isDrawerOpen_);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const [showPriceTable, setShowPrice] = useState(false);
   const [showFareRules, setShowFare] = useState(false);
+  const [shouldFetch, setFetch] = useState(false);
   console.log("farePenalties", farePenalties);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const alertPop = (message, type) => {
@@ -212,60 +213,71 @@ const FlightSumarry = ({
     return res;
   };
 
-  const { data, error, isValidating, mutate } = useSWR("static", fetcher, {
-    focusThrottleInterval: 86400000,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    refreshInterval: 86400000,
-    shouldRetryOnError: true,
-    errorRetryCount: 3,
-    errorRetryInterval: 100,
-    initialData: [],
-    onLoadingSlow: () => {
-      //  console.log("slow network detected");
-    },
-    onError: (error) => {
-      console.log("error from fetcher", error, error.response);
-      if (error.response) {
-        for (let item of error.response.data.errors) {
-          alertPop(item.title, "info");
-          alertPop(item.detail, "info");
+  const { data, error, isValidating } = useSWR(
+    shouldFetch ? "static" : null,
+    fetcher,
+    {
+      onError: (error) => {
+        console.log("error from fetcher", error, error.response);
+        if (error.response) {
+          for (let item of error.response.data.errors) {
+            alertPop(item.title, "info");
+            alertPop(item.detail, "info");
+          }
         }
-      }
-    },
-    onSuccess: (data) => {
-      console.log("running post success data");
-      console.log("success data", data.data);
-      if (data.data.warning) {
-        alertPop(data.data.warning.detail, "warning");
-        if (data.data.warning.code === "0") {
-          alertPop(
-            "Fares keep changing as many people are booking. Always complete your booking faster to avoid fare increase change",
-            "info"
-          );
+      },
+      onErrorRetry: (error, key, option, revalidate, { retryCount }) => {
+        console.log("retryCount", retryCount);
+        if (retryCount >= 4) {
+          setFetch(false);
+          return;
         }
-        alertPop("Sorry, we are redirecting you to the search result.", "info");
+        console.log("trying again");
 
         setTimeout(() => {
-          router.push("/flightresult");
-        }, 5000);
-        return;
-      }
-      window.localStorage.setItem(
-        "passengerInfo",
-        JSON.stringify(getPassengerInfo(data.data.data))
-      );
-      window.localStorage.setItem(
-        "bookedFlightOffer",
-        JSON.stringify(flightOffer)
-      );
+          revalidate({ retryCount: retryCount + 1 });
+        }, 500);
+      },
+      onSuccess: (data) => {
+        console.log("running post success data");
+        console.log("success data", data.data);
+        if (data.data.warning) {
+          alertPop(data.data.warning.detail, "warning");
+          if (data.data.warning.code === "0") {
+            alertPop(
+              "Fares keep changing as many people are booking. Always complete your booking faster to avoid fare increase change",
+              "info"
+            );
+          }
+          alertPop(
+            "Sorry, we are redirecting you to the search result.",
+            "info"
+          );
 
-      window.localStorage.setItem("offerPricing", JSON.stringify(data.data));
-      //  setIsLoading(false);
-      toggleDrawerState(false);
-      router.push("/passengerinfo");
-    },
-  });
+          setTimeout(() => {
+            router.push("/flightresult").then((res) => {
+              window.scrollTo(0, 0);
+            });
+          }, 5000);
+          return;
+        }
+        window.localStorage.setItem(
+          "passengerInfo",
+          JSON.stringify(getPassengerInfo(data.data.data))
+        );
+        window.localStorage.setItem(
+          "bookedFlightOffer",
+          JSON.stringify(flightOffer)
+        );
+
+        window.localStorage.setItem("offerPricing", JSON.stringify(data.data));
+        toggleDrawerState(false);
+        router.push("/passengerinfo").then((res) => {
+          window.scrollTo(0, 0);
+        });
+      },
+    }
+  );
 
   return (
     <React.Fragment>
@@ -335,9 +347,8 @@ const FlightSumarry = ({
                   <Button
                     size="small"
                     disabled={isValidating}
-                    onClick={() => {
-                      // setIsLoading(true);
-                      mutate([], true);
+                    onClick={() => {                   
+                      setFetch(true);
                     }}
                     variant="contained"
                     color="primary"
