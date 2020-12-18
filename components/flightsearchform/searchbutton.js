@@ -363,7 +363,9 @@ const SearchButton = () => {
         "local",
         JSON.stringify({ lastSearch: data, prevState: state })
       );
-      router.push("/flightresult");
+      router.push("/flightresult").then((res) => {
+        window.scrollTo(0, 0);
+      });
     }
   };
   return (

@@ -63,14 +63,18 @@ const SuccessfullBooking = () => {
           "info"
         );
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       const departureDate = local.prevState.departureDate;
       if (new Date(departureDate).getTime() < new Date().getTime()) {
         alertPop("travel date is in the past, redirecting to hompage", "info");
         setTimeout(() => {
-          router.push("/");
+          router.push("/").then((res) => {
+            window.scrollTo(0, 0);
+          });
         }, 3000);
       }
       setLocal(local);
