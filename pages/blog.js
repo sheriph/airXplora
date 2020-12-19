@@ -140,7 +140,7 @@ export default Blog;
 export async function getStaticProps() {
   const posts = await getAllPosts(`
   {
-    posts(first: 10) {
+    posts(first: 3) {
       nodes {
         id
         title
