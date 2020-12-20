@@ -45,6 +45,7 @@
     "react-moment": "^1.0.0",
     "react-text-mask": "^5.4.3",
     "react-topbar-progress-indicator": "^4.1.0",
+    "react-window": "^1.8.6",
     "recoil": "0.0.10",
     "swr": "^0.3.2"
   },

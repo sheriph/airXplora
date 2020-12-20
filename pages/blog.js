@@ -13,6 +13,7 @@ import BaseHeader from "../components/headers/baseheader";
 import { getAllPosts } from "../lib/api";
 import LazyLoad from "react-lazyload";
 import Skeleton from "@material-ui/lab/Skeleton";
+import { startCase } from "lodash";
 
 const styles = makeStyles((theme) => ({
   spxs2: {
@@ -62,13 +63,22 @@ const Blog = ({ posts }) => {
             <Typography variant="caption">Latest Article</Typography>
           </Grid>
           <Grid item>
-            <Typography variant="h5">
-              The Strange Happening Aroung the world
-            </Typography>
+            <Typography variant="h5">{startCase(posts[0].title)}</Typography>
           </Grid>
           <Grid item style={{ textAlign: "end" }}>
             <Typography align="right" variant="caption">
-              Travel Gist
+              {posts[0].categories.nodes.map((cat, index) => (
+                <React.Fragment key={index}>
+                  <span>{startCase(cat.name)}</span>
+                  {index === posts[0].categories.nodes.length - 1 ? (
+                    ""
+                  ) : (
+                    <span style={{ marginRight: "3px", marginLeft: "3px" }}>
+                      |
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
             </Typography>
           </Grid>
         </Grid>
@@ -110,8 +120,8 @@ const Blog = ({ posts }) => {
             .map((post, index) => (
               <Grid key={index} item xs={12} sm={6} md={4}>
                 <LazyLoad
-                  height={200}
-                  offset={300}
+                  height={50}
+                  // offset={300}
                   unmountIfInvisible
                   placeholder={
                     <Container className={classes.placeholdercontainer}>
@@ -120,7 +130,7 @@ const Blog = ({ posts }) => {
                       </Box>
                     </Container>
                   }
-                  scroll
+                  debounce
                 >
                   <ClassicBlogCard post={post} />
                 </LazyLoad>
@@ -138,39 +148,22 @@ const Blog = ({ posts }) => {
 export default Blog;
 
 export async function getStaticProps() {
-  const posts = await getAllPosts(`
-  {
-    posts(first: 3) {
-      nodes {
-        id
-        title
-        slug
-        excerpt
-        date
-        author {
-          node {
-            name
-          }
-        }
-        featuredImage {
-          node {
-            altText
-            sourceUrl(size: LARGE)
-          }
-        }
-        categories {
-          nodes {
-            name
-          }
-        }
-      }
+  let after = "null";
+  let allNodes = [];
+  for (let i = 0; i < 100; i++) {
+    const posts = await getAllPosts(after);
+    allNodes = allNodes.concat(posts.nodes);
+    after = posts.pageInfo.endCursor;
+    if (posts.pageInfo.hasNextPage) {
+      continue;
+    } else {
+      break;
     }
   }
-  
-      `);
+
   return {
     props: {
-      posts: posts?.nodes,
+      posts: allNodes,
     },
   };
 }
