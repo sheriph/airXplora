@@ -10,45 +10,37 @@ import React, { useEffect, useState } from "react";
 import ClassicBlogCard from "../components/blog/classicblog";
 import ClassicFooter from "../components/footers/classicfooter";
 import BaseHeader from "../components/headers/baseheader";
-import { getAllPosts, getSinglePost } from "../lib/api";
+import { getAllPosts, getAllPostsSlugs, getSinglePost } from "../lib/api";
 import { useRouter } from "next/router";
 import { startCase } from "lodash";
 import ShowPost from "../components/blog/showpost";
+import Head from "next/head";
 
 export async function getStaticProps({ params }) {
-//  console.log("params", params);
+  //  console.log("params", params);
 
-  const post = await getSinglePost(`
-  {
-    post(id: ${`"${params.pid}"`}, idType: SLUG) {
-      content
-      categories {
-        nodes {
-          name
-        }
-      }
-      title
-    }
-  }  
-  `);
+  const post = await getSinglePost(params.pid);
   return { props: { post } };
 }
 
 export async function getStaticPaths() {
-  const posts = await getAllPosts(`
-      {
-        posts(first: 100000000) {
-          nodes {
-            slug
-            id
-          }
-        }
-      }
-      `);
-  const paths = posts.nodes.map((post) => {
+  let after = "null";
+  let allNodes = [];
+  for (let i = 0; i < 100; i++) {
+    const posts = await getAllPostsSlugs(after);
+    allNodes = allNodes.concat(posts.nodes);
+    after = posts.pageInfo.endCursor;
+    if (posts.pageInfo.hasNextPage) {
+      continue;
+    } else {
+      break;
+    }
+  }
+
+  const paths = allNodes.map((post) => {
     return { params: { pid: post.slug } };
   });
-//  console.log("paths node", paths);
+
   return { paths, fallback: false };
 }
 
@@ -107,7 +99,10 @@ const SinglePost = ({ post }) => {
         </Grid>
         <Grid item xs={12}>
           <Container>
-            <ShowPost content={post.content} />
+            <ShowPost
+              content={post.content}
+              wpstyles={post.enqueuedStylesheets.nodes}
+            />
           </Container>
         </Grid>
         <Grid item xs={12}>
