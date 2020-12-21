@@ -15,15 +15,28 @@ const ShowPost = ({ content, wpstyles }) => {
           <link
             key={index}
             href={
-              style.src.includes("https://naijagoingabroad.com")
+              style.src.startsWith("https://naijagoingabroad.com")
                 ? `${style.src}`
-                : `https://naijagoingabroad.com${style.src}`
+                : `${
+                    style.src.startsWith("//")
+                      ? `https:${style.src}`
+                      : `${
+                          style.src.startsWith("/")
+                            ? `https://naijagoingabroad.com${style.src}`
+                            : `https://naijagoingabroad.com/${style.src}`
+                        }`
+                  }`
             }
             rel="stylesheet"
+            media="print"
+            onload="this.media='all'"
           />
         ))}
       </Head>
-      <Box dangerouslySetInnerHTML={{ __html: content }}></Box>
+
+      <Box
+        dangerouslySetInnerHTML={{ __html: content }}
+      ></Box>
     </Box>
   );
 };
