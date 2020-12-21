@@ -52,6 +52,9 @@ const styles = makeStyles((theme) => ({
     marginBottom: "20px",
     minHeight: "150px",
   },
+  title: {
+    color: theme.palette.getContrastText(theme.palette.primary.main),
+  },
 }));
 
 const SinglePost = ({ post }) => {
@@ -75,13 +78,21 @@ const SinglePost = ({ post }) => {
           className={classes.headergrid}
         >
           <Grid item>
-            <Typography variant="caption">Title</Typography>
+            <Typography className={classes.title} variant="caption">
+              Title
+            </Typography>
           </Grid>
           <Grid item>
-            <Typography variant="h5">{post.title}</Typography>
+            <Typography className={classes.title} variant="h5">
+              {post.title}
+            </Typography>
           </Grid>
           <Grid item style={{ textAlign: "end" }}>
-            <Typography align="right" variant="caption">
+            <Typography
+              className={classes.title}
+              align="right"
+              variant="caption"
+            >
               {post.categories.nodes.map((cat, index) => (
                 <React.Fragment key={index}>
                   <span>{startCase(cat.name)}</span>
