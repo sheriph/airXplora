@@ -128,6 +128,7 @@ const FlightOffersList = ({ storeData }) => {
       console.log("response at interceptor", commissionData, res);
       return res;
     },
+    
     async (error) => {
       if (
         error.response &&
