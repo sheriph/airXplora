@@ -19,6 +19,9 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import firebase from "../../../firebase/index";
 import { useDocument } from "@nandorojo/swr-firestore";
 import Skeleton from "@material-ui/lab/Skeleton";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const styles = makeStyles((theme) => ({
   secttion1: {
@@ -37,7 +40,8 @@ const styles = makeStyles((theme) => ({
     padding: "0", */
   },
   logo: {
-    //   marginRight: theme.spacing(2),
+    marginRight: theme.spacing(2),
+    paddingTop: theme.spacing(1),
   },
 }));
 
@@ -48,6 +52,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const Header1 = () => {
   const classes = styles();
   const [open, setOpen] = React.useState(false);
+  const router = useRouter();
+  const { pathname } = router;
 
   const { data, error, loading } = useDocument("adminSettings/agencyProfile");
   return (
@@ -101,7 +107,16 @@ const Header1 = () => {
               alignItems="center"
             >
               <Grid item xs="auto" className={classes.logo}>
-                LOGO
+                <Link href="/">
+                  <a>
+                    <Image
+                      src="/airxplora-logo.png"
+                      alt="logo"
+                      width={93}
+                      height={31}
+                    />
+                  </a>
+                </Link>
               </Grid>
               <Hidden xsDown>
                 <Grid
@@ -113,16 +128,27 @@ const Header1 = () => {
                   alignItems="center"
                 >
                   <Grid item xs="auto">
-                    <Button variant="outlined">Home</Button>
+                    <Link href="/">
+                      <a style={{ textDecoration: "none" }}>
+                        <Button
+                          variant={pathname === "/" ? "outlined" : "text"}
+                        >
+                          Flight
+                        </Button>
+                      </a>
+                    </Link>
                   </Grid>
+
                   <Grid item xs="auto">
-                    <Button variant="text">Flight</Button>
-                  </Grid>
-                  <Grid item xs="auto">
-                    <Button variant="text">Hotel</Button>
-                  </Grid>
-                  <Grid item xs="auto">
-                    <Button variant="text">Blog</Button>
+                    <Link href="/blog">
+                      <a style={{ textDecoration: "none" }}>
+                        <Button
+                          variant={pathname === "/blog" ? "outlined" : "text"}
+                        >
+                          Blog
+                        </Button>
+                      </a>
+                    </Link>
                   </Grid>
                 </Grid>
               </Hidden>

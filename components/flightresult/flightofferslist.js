@@ -74,11 +74,14 @@ const FlightOffersList = ({ storeData }) => {
   const uidata = useRecoilValue(flightOffers_);
   const router = useRouter();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { data: commissionData } = useDocument(
+    "adminSettings/commissionSettings"
+  );
 
   TopBarProgress.config({
     barColors: {
-      "0": "#f50000",
-      "0.5": "#2ec730",
+      0: "#f50000",
+      0.5: "#2ec730",
       "1.0": "#2ec730",
     },
     shadowBlur: 7,
@@ -121,7 +124,10 @@ const FlightOffersList = ({ storeData }) => {
   );
 
   axiosFlightOffers.interceptors.response.use(
-    (res) => res,
+    (res) => {
+      console.log("response at interceptor", commissionData, res);
+      return res;
+    },
     async (error) => {
       if (
         error.response &&
@@ -166,7 +172,7 @@ const FlightOffersList = ({ storeData }) => {
   };
 
   const { data, error, isValidating, mutate } = useSWR(
-    "flightOffers",
+    commissionData ? "flightOffers" : null,
     fetcher,
     {
       focusThrottleInterval: 86400000,
@@ -178,14 +184,14 @@ const FlightOffersList = ({ storeData }) => {
       shouldRetryOnError: true,
       errorRetryCount: 3,
       onLoadingSlow: () => {
-       // alertPop("slow network detected", "warning");
+        // alertPop("slow network detected", "warning");
       },
       onError: (error) => {
-      //  console.log("on eror", error);
-      //  alertPop("error getting flight options, trying again ....", "warning");
+        //  console.log("on eror", error);
+        //  alertPop("error getting flight options, trying again ....", "warning");
       },
       onSuccess: (data) => {
-      //  alertPop("flight options received", "success");
+        //  alertPop("flight options received", "success");
         setRenderedData(data);
       },
       //  initialData: defaultData,
