@@ -7,7 +7,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { formatPrice, getPriceRows } from "../general/utilities";
-import { Container, useMediaQuery } from "@material-ui/core";
+import { Container, Typography, useMediaQuery } from "@material-ui/core";
 
 const styles = makeStyles({});
 
@@ -55,10 +55,17 @@ const PriceSummary = ({ flightOffer }) => {
                 colSpan={3}
                 style={{ paddingTop: "10px", paddingBottom: "10px" }}
               >
-                Grand Total
+                Grand Total{" "}
+                {flightOffer.price.agencyTotal ? (
+                  <Typography variant="caption"> (+Other Fees) </Typography>
+                ) : (
+                  ""
+                )}
               </TableCell>
               <TableCell align="right">
-                {formatPrice(flightOffer.price.total)}
+                {formatPrice(
+                  flightOffer.price.agencyTotal || flightOffer.price.total
+                )}
               </TableCell>
             </TableRow>
           </TableBody>

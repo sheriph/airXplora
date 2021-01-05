@@ -120,6 +120,7 @@ const SinglePost = ({ post }) => {
           <ClassicFooter />
         </Grid>
       </Grid>
+      
     </Container>
   );
 };

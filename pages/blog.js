@@ -141,6 +141,7 @@ const Blog = ({ posts }) => {
           <ClassicFooter />
         </Grid>
       </Grid>
+      
     </Container>
   );
 };

@@ -74,11 +74,14 @@ const FlightOffersList = ({ storeData }) => {
   const uidata = useRecoilValue(flightOffers_);
   const router = useRouter();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { data: commissionData } = useDocument(
+    "adminSettings/commissionSettings"
+  );
 
   TopBarProgress.config({
     barColors: {
-      "0": "#f50000",
-      "0.5": "#2ec730",
+      0: "#f50000",
+      0.5: "#2ec730",
       "1.0": "#2ec730",
     },
     shadowBlur: 7,
@@ -121,7 +124,51 @@ const FlightOffersList = ({ storeData }) => {
   );
 
   axiosFlightOffers.interceptors.response.use(
-    (res) => res,
+    (res) => {
+      console.log("response at interceptor", commissionData, res);
+      const { tableData } = commissionData;
+
+      let updatedOffers = res.data.data.map((offer) => {
+        let carrierPricing = tableData.filter(
+          (item) =>
+            item.iataCode.toUpperCase() === offer.validatingAirlineCodes[0]
+        )[0];
+        if (carrierPricing) {
+          let markup =
+            offer.itineraries[0].segments[0].departure.iataCode === "LOS" ||
+            offer.itineraries[0].segments[0].departure.iataCode === "ABV" ||
+            offer.itineraries[0].segments[0].departure.iataCode === "PHC"
+              ? carrierPricing.markup
+              : carrierPricing.sotoMarkup;
+          if (Number.isInteger(markup) && markup !== 0) {
+            let totalMarkup = (markup / 100) * Number(offer.price.base);
+            let fees = Number.isInteger(carrierPricing.fixMarkup)
+              ? carrierPricing.fixMarkup
+              : 0;
+            let newOffer = {
+              ...offer,
+              price: {
+                ...offer.price,
+                agencyTotal: Number(offer.price.total) + totalMarkup + fees,
+              },
+            };
+
+            return newOffer;
+          } else {
+            return offer;
+          }
+        } else {
+          return offer;
+        }
+      });
+
+      console.log("updatedOffers", updatedOffers);
+
+      let modRes = { ...res, data: { ...res.data, data: [...updatedOffers] } };
+      return modRes;
+      return res;
+    },
+
     async (error) => {
       if (
         error.response &&
@@ -166,7 +213,7 @@ const FlightOffersList = ({ storeData }) => {
   };
 
   const { data, error, isValidating, mutate } = useSWR(
-    "flightOffers",
+    commissionData ? "flightOffers" : null,
     fetcher,
     {
       focusThrottleInterval: 86400000,
@@ -178,14 +225,14 @@ const FlightOffersList = ({ storeData }) => {
       shouldRetryOnError: true,
       errorRetryCount: 3,
       onLoadingSlow: () => {
-       // alertPop("slow network detected", "warning");
+        // alertPop("slow network detected", "warning");
       },
       onError: (error) => {
-      //  console.log("on eror", error);
-      //  alertPop("error getting flight options, trying again ....", "warning");
+        //  console.log("on eror", error);
+        //  alertPop("error getting flight options, trying again ....", "warning");
       },
       onSuccess: (data) => {
-      //  alertPop("flight options received", "success");
+        //  alertPop("flight options received", "success");
         setRenderedData(data);
       },
       //  initialData: defaultData,

@@ -1,6 +1,7 @@
 import { Box } from "@material-ui/core";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
+const axios = require("axios");
 
 const ShowPost = ({ content, wpstyles }) => {
   console.log(wpstyles);
@@ -8,6 +9,8 @@ const ShowPost = ({ content, wpstyles }) => {
 
   return (
     <Box>
+      <style jsx global>{``}</style>
+
       <Head>
         <meta name="robots" content="noindex" />
 
@@ -33,10 +36,7 @@ const ShowPost = ({ content, wpstyles }) => {
           />
         ))}
       </Head>
-
-      <Box
-        dangerouslySetInnerHTML={{ __html: content }}
-      ></Box>
+      <Box dangerouslySetInnerHTML={{ __html: content }}></Box>
     </Box>
   );
 };

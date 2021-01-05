@@ -95,7 +95,7 @@ const FlightResult = () => {
       const local = JSON.parse(window.localStorage.getItem("local"));
       if (local === "undefined") {
         alertPop(
-          "you have made any search, please search for a flight on the homepage",
+          "Please search for a flight on the homepage",
           "success"
         );
         setTimeout(() => {
@@ -107,7 +107,7 @@ const FlightResult = () => {
       const departureDate = local.prevState.departureDate;
       if (new Date(departureDate).getTime() < new Date().getTime()) {
         alertPop(
-          "travel date is in the past, redirecting to hompage",
+          "travel date is in the past, redirecting to homepage",
           "success"
         );
         setTimeout(() => {
