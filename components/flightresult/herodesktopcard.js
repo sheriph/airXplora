@@ -118,7 +118,10 @@ const HeroDesktopCard = ({ flightOffer }) => {
               >
                 <Grid item>
                   <Typography color="primary" variant="button">
-                    &#8358; {formatPrice(flightOffer.price.total)}
+                    &#8358;{" "}
+                    {formatPrice(
+                      flightOffer.price.agencyTotal || flightOffer.price.total
+                    )}
                   </Typography>
                 </Grid>
                 <Grid item>

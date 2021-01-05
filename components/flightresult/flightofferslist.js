@@ -126,9 +126,49 @@ const FlightOffersList = ({ storeData }) => {
   axiosFlightOffers.interceptors.response.use(
     (res) => {
       console.log("response at interceptor", commissionData, res);
+      const { tableData } = commissionData;
+
+      let updatedOffers = res.data.data.map((offer) => {
+        let carrierPricing = tableData.filter(
+          (item) =>
+            item.iataCode.toUpperCase() === offer.validatingAirlineCodes[0]
+        )[0];
+        if (carrierPricing) {
+          let markup =
+            offer.itineraries[0].segments[0].departure.iataCode === "LOS" ||
+            offer.itineraries[0].segments[0].departure.iataCode === "ABV" ||
+            offer.itineraries[0].segments[0].departure.iataCode === "PHC"
+              ? carrierPricing.markup
+              : carrierPricing.sotoMarkup;
+          if (Number.isInteger(markup) && markup !== 0) {
+            let totalMarkup = (markup / 100) * Number(offer.price.base);
+            let fees = Number.isInteger(carrierPricing.fixMarkup)
+              ? carrierPricing.fixMarkup
+              : 0;
+            let newOffer = {
+              ...offer,
+              price: {
+                ...offer.price,
+                agencyTotal: Number(offer.price.total) + totalMarkup + fees,
+              },
+            };
+
+            return newOffer;
+          } else {
+            return offer;
+          }
+        } else {
+          return offer;
+        }
+      });
+
+      console.log("updatedOffers", updatedOffers);
+
+      let modRes = { ...res, data: { ...res.data, data: [...updatedOffers] } };
+      return modRes;
       return res;
     },
-    
+
     async (error) => {
       if (
         error.response &&

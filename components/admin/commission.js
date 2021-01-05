@@ -70,6 +70,13 @@ const CommissionTable = () => {
     {
       title: "Airline",
       field: "iataCode",
+      validate: (rowData) =>
+        rowData.iataCode && rowData.iataCode.length !== 2
+          ? "2 digit iataCode only "
+          : "",
+      cellStyle: {
+        textTransform: "uppercase",
+      },
     },
     {
       title: "Markup",
@@ -89,37 +96,13 @@ const CommissionTable = () => {
       initialEditValue: "0",
       type: "numeric",
     },
-    {
-      title: "Class1",
-      field: "promoClass1",
-      initialEditValue: "",
-      lookup: { 0: "", 1: "A", 2: "B", 3: "C", 4: "D", 5: "E", 6: "F" },
-    },
-    {
-      title: "Price1",
-      field: "priceOfClass1",
-      initialEditValue: "0",
-      type: "numeric",
-    },
-    {
-      title: "Class2",
-      field: "promoClass2",
-      initialEditValue: "",
-      lookup: { 0: "", 1: "A", 2: "B", 3: "C", 4: "D", 5: "E", 6: "F" },
-    },
-    {
-      title: "Price2",
-      field: "priceOfClass2",
-      initialEditValue: "0",
-      type: "numeric",
-    },
   ]);
-
+  const [selectedRow, setSelectedRow] = useState(null);
   // const [data, setData] = useState([]);
 
-  const { data, update, error, loading } = useDocument(
-    "adminSettings/commissionSettings"
-  );
+  const { data, update } = useDocument("adminSettings/commissionSettings", {
+    listen: true,
+  });
   if (!data)
     return (
       <>
@@ -168,7 +151,7 @@ const CommissionTable = () => {
                     .catch((err) => console.log(err));
                   //       console.log("data", previousData);
                 }
-              }, 100);
+              }, 1000);
             }),
           onRowDelete: (deletedRow) =>
             new Promise((resolve, reject) => {
@@ -185,6 +168,15 @@ const CommissionTable = () => {
                 resolve();
               }, 100);
             }),
+        }}
+        onRowClick={(evt, selectedRow) =>
+          setSelectedRow(selectedRow.tableData.id)
+        }
+        options={{
+          rowStyle: (rowData) => ({
+            backgroundColor:
+              selectedRow === rowData.tableData.id ? "#EEE" : "#FFF",
+          }),
         }}
       />
     </Container>

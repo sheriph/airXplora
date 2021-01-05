@@ -320,7 +320,10 @@ const FlightSumarry = ({
                   }}
                 >
                   <Typography color="primary">
-                    &#8358;{formatPrice(flightOffer.price.total)}
+                    &#8358;
+                    {formatPrice(
+                      flightOffer.price.agencyTotal || flightOffer.price.total
+                    )}
                   </Typography>
                 </Grid>
                 <Grid
@@ -347,7 +350,7 @@ const FlightSumarry = ({
                   <Button
                     size="small"
                     disabled={isValidating}
-                    onClick={() => {                   
+                    onClick={() => {
                       setFetch(true);
                     }}
                     variant="contained"

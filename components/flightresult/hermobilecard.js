@@ -35,7 +35,6 @@ const styles = makeStyles((theme) => ({
 const HeroMobileCard = ({ flightOffer }) => {
   const classes = styles();
   // const isMobile = useMediaQuery("(max-width: 600px)");
-
   const itineraries = flightOffer.itineraries;
   return (
     <Container disableGutters>
@@ -175,7 +174,10 @@ const HeroMobileCard = ({ flightOffer }) => {
             >
               <Grid item>
                 <Typography variant="button" color="primary">
-                  &#8358; {formatPrice(flightOffer.price.total)}
+                  &#8358;{" "}
+                  {formatPrice(
+                    flightOffer.price.agencyTotal || flightOffer.price.total
+                  )}
                 </Typography>
               </Grid>
               <Grid item>
