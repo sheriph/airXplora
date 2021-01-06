@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Grid,
@@ -14,6 +14,7 @@ import {
   Box,
   Badge,
   Paper,
+  useMediaQuery,
 } from "@material-ui/core";
 import FlightIcon from "@material-ui/icons/Flight";
 import ShareIcon from "@material-ui/icons/Share";
@@ -21,7 +22,7 @@ import ShareIcon from "@material-ui/icons/Share";
 const styles = makeStyles((theme) => ({
   media: {
     minHeight: "150px",
-  //  width: "200px"
+    //  width: "300px",
   },
   flightIcon: {
     transform: "rotate(90deg)",
@@ -30,12 +31,18 @@ const styles = makeStyles((theme) => ({
     height: "150px",
     padding: "10px",
     backgroundColor: "rgba(0,0,0,0.4)",
+    // width: "100%",
   },
   shareIcon: {
     padding: "2px 4px 2px 4px",
   },
   box: {
     color: theme.palette.common.white,
+  },
+  containerRoot: {
+    paddingLeft: "5px",
+    paddingRight: "5px",
+    marginBottom: "15px"
   },
 }));
 
@@ -44,10 +51,10 @@ const HotDeal = () => {
 
   const HotelCard = () => {
     return (
-      <Container>
+      <Container classes={{ root: classes.containerRoot }}>
         <Paper variant="elevation" elevation={5}>
           <Grid container>
-            <Grid item>
+            <Grid item style={{ width: "100%" }}>
               <Card>
                 <CardActionArea>
                   <CardMedia
@@ -117,11 +124,27 @@ const HotDeal = () => {
   };
 
   const [cardItems, setCardItems] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  const [gridUnit, setGridUnit] = useState(12);
+
+  const oneBox = useMediaQuery("(max-width:600px)");
+  const twoBox = useMediaQuery("(max-width:900px) and (min-width:600px)");
+  const threeBox = useMediaQuery("(max-width:1200px) and (min-width:900px)");
+
+  useEffect(() => {
+    if (oneBox) {
+      setGridUnit(12);
+    } else if (twoBox) {
+      setGridUnit(6);
+    } else if (threeBox) {
+      setGridUnit(4);
+    }
+  });
+
   return (
     <Container>
-      <Grid container justify="center" spacing={2}>
+      <Grid container justify="center">
         {cardItems.map((card, index) => (
-          <Grid item key={index}>
+          <Grid classes={{}} xs={gridUnit} item key={index}>
             <HotelCard />
           </Grid>
         ))}
