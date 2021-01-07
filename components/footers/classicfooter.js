@@ -59,7 +59,7 @@ const ClassicFooter = () => {
                 <EmailIcon />
               </Grid>
               <Grid item xs={9} sm={10} md={11}>
-                <Typography>info@naijagoingabroad.com</Typography>
+                <Typography>sheriph4real@gmail.com</Typography>
               </Grid>
             </Grid>
           </Grid>
