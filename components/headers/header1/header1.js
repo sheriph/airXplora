@@ -139,7 +139,7 @@ const Header1 = () => {
                     </Link>
                   </Grid>
 
-                  <Grid item xs="auto">
+                 {/*  <Grid item xs="auto">
                     <Link href="/blog">
                       <a style={{ textDecoration: "none" }}>
                         <Button
@@ -149,7 +149,7 @@ const Header1 = () => {
                         </Button>
                       </a>
                     </Link>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Hidden>
               <Hidden smUp>
@@ -183,10 +183,10 @@ const Header1 = () => {
             <Button variant="text">
               <CloseIcon onClick={() => setOpen((prev) => !prev)} />
             </Button>
-            <Button variant="outlined">Home</Button>
-            <Button variant="text">Flight</Button>
-            <Button variant="text">Hotel</Button>
-            <Button variant="text">Blog</Button>
+{/*             <Button variant="outlined">Home</Button>
+ */}            <Button variant="text">Flight</Button>
+          {/*   <Button variant="text">Hotel</Button>
+            <Button variant="text">Blog</Button> */}
           </Grid>
         </Dialog>
       </Paper>
