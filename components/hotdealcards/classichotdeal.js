@@ -42,7 +42,7 @@ const styles = makeStyles((theme) => ({
   containerRoot: {
     paddingLeft: "5px",
     paddingRight: "5px",
-    marginBottom: "15px"
+    marginBottom: "15px",
   },
 }));
 
@@ -129,6 +129,7 @@ const HotDeal = () => {
   const oneBox = useMediaQuery("(max-width:600px)");
   const twoBox = useMediaQuery("(max-width:900px) and (min-width:600px)");
   const threeBox = useMediaQuery("(max-width:1200px) and (min-width:900px)");
+  const fourBox = useMediaQuery("(max-width:5000px) and (min-width:1200px)");
 
   useEffect(() => {
     if (oneBox) {
@@ -137,6 +138,8 @@ const HotDeal = () => {
       setGridUnit(6);
     } else if (threeBox) {
       setGridUnit(4);
+    } else if (fourBox) {
+      setGridUnit(3);
     }
   });
 
